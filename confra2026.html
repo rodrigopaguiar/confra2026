@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONFRA2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              orange: '#F15A24',
+              orangeDark: '#D94916',
+              teal: '#00B5A5',
+              tealDark: '#008E82',
+              dark: '#1E293B',
+              light: '#F8FAFC'
+            }
+          },
+          fontFamily: {
+            sans: ['"Open Sans"', 'sans-serif'],
+            heading: ['Montserrat', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-brand-light text-slate-700 font-sans antialiased">
+
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-full bg-brand-orange flex items-center justify-center text-white font-heading font-black text-xl tracking-tighter shadow">
+          †
+        </div>
+        <div>
+          <span class="font-heading font-black text-lg text-brand-orange tracking-tight block leading-tight">IBFO</span>
+          <span class="text-[10px] text-slate-500 font-semibold block uppercase">Igreja Batista da Família</span>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-600">
+        <a href="#detalhes" class="hover:text-brand-orange transition">Sobre o Evento</a>
+        <a href="#programacao" class="hover:text-brand-orange transition">Programação</a>
+        <a href="#valores" class="hover:text-brand-orange transition">Contribuição</a>
+        <a href="#faq" class="hover:text-brand-orange transition">Dúvidas</a>
+        <a href="#inscricao" class="bg-brand-orange hover:bg-brand-orangeDark text-white px-5 py-2 rounded-full shadow-md transition font-heading">Inscreva-se</a>
+      </nav>
+      <a href="#inscricao" class="md:hidden bg-brand-orange text-white text-xs font-bold px-4 py-2 rounded-full">Garantir Vaga</a>
+    </div>
+  </header>
+
+  <section class="relative min-h-[90vh] md:min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+    <div id="carousel" class="absolute inset-0 z-0">
+      <div class="carousel-slide absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-100 bg-cover bg-center" style="background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1920&q=80');"></div>
+      <div class="carousel-slide absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0 bg-cover bg-center" style="background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=1920&q=80');"></div>
+      <div class="carousel-slide absolute inset-0 transition-opacity duration-1000 ease-in-out opacity-0 bg-cover bg-center" style="background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1920&q=80');"></div>
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-4 py-16 text-center text-white">
+      <img src="CONFRA2026%20LOGO.png" alt="Logo CONFRA2026" class="mx-auto mb-8 max-h-56 sm:max-h-72 md:max-h-80 w-auto drop-shadow-lg">
+      <span class="inline-block bg-brand-teal text-white font-bold text-xs md:text-sm uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 shadow">
+        Confraternização de Fim de Ano
+      </span>
+      <h1 class="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-heading font-black leading-tight tracking-tight mb-4 uppercase drop-shadow-md">
+        Confraternização IBFO, IBFS e CTAT 2026
+      </h1>
+
+      <blockquote class="text-lg md:text-xl font-bold italic text-slate-200 max-w-2xl mx-auto mb-8 border-l-4 border-brand-teal pl-4 text-left md:text-center md:border-none">
+        "Este é o dia que fez o Senhor; regozijemo-nos e alegremo-nos nele."
+        <span class="block text-sm not-italic font-bold text-brand-orange mt-1">Salmos 118:24</span>
+      </blockquote>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 md:gap-6 mb-10 text-sm font-semibold">
+        <div class="flex items-center bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20">
+          <i data-lucide="calendar" class="w-4 h-4 mr-2 text-brand-teal"></i> 28/11/2026
+        </div>
+        <div class="flex items-center bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20">
+          <i data-lucide="clock" class="w-4 h-4 mr-2 text-brand-orange"></i> 07:00 às 18:00
+        </div>
+        <div class="flex items-center bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20">
+          <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-brand-teal"></i> Portal do Sol - Mairinque
+        </div>
+      </div>
+
+      <div class="bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/15 max-w-lg mx-auto shadow-2xl mb-8">
+        <p class="text-xs uppercase tracking-widest font-bold text-slate-300 mb-3">Tempo restante para o nosso encontro:</p>
+        <div class="grid grid-cols-4 gap-2 text-center" id="countdown">
+          <div class="bg-white/10 p-2 rounded-lg">
+            <span id="days" class="font-heading font-black text-2xl md:text-3xl text-brand-orange block">00</span>
+            <span class="text-[10px] uppercase font-bold text-slate-300">Dias</span>
+          </div>
+          <div class="bg-white/10 p-2 rounded-lg">
+            <span id="hours" class="font-heading font-black text-2xl md:text-3xl text-brand-teal block">00</span>
+            <span class="text-[10px] uppercase font-bold text-slate-300">Horas</span>
+          </div>
+          <div class="bg-white/10 p-2 rounded-lg">
+            <span id="minutes" class="font-heading font-black text-2xl md:text-3xl text-brand-orange block">00</span>
+            <span class="text-[10px] uppercase font-bold text-slate-300">Min</span>
+          </div>
+          <div class="bg-white/10 p-2 rounded-lg">
+            <span id="seconds" class="font-heading font-black text-2xl md:text-3xl text-brand-teal block">00</span>
+            <span class="text-[10px] uppercase font-bold text-slate-300">Seg</span>
+          </div>
+        </div>
+      </div>
+
+      <a href="#inscricao" class="inline-flex items-center space-x-2 bg-brand-orange hover:bg-brand-orangeDark text-white text-base md:text-lg font-heading font-bold px-8 py-4 rounded-full shadow-lg hover:scale-105 transition transform">
+        <span>Fazer Minha Inscrição Agora</span>
+        <i data-lucide="arrow-down" class="w-5 h-5"></i>
+      </a>
+    </div>
+  </section>
+
+  <section id="detalhes" class="py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-brand-teal font-heading font-bold text-xs uppercase tracking-widest">Um dia inesquecível em família</span>
+        <h2 class="text-3xl md:text-4xl font-heading font-extrabold text-slate-900 mt-2">O que preparamos para você e sua família</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:border-brand-teal/40 transition hover:shadow-lg">
+          <div class="w-14 h-14 rounded-xl bg-teal-50 text-brand-teal flex items-center justify-center mb-6">
+            <i data-lucide="bus" class="w-7 h-7"></i>
+          </div>
+          <h3 class="font-heading font-bold text-xl text-slate-900 mb-2">Transporte Incluso</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Ônibus fretado com saída pontual às <strong>07h</strong> da IBFO e retorno previsto para as <strong>18h</strong>, garantindo total conforto e segurança para sua família.</p>
+        </div>
+
+        <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:border-brand-orange/40 transition hover:shadow-lg">
+          <div class="w-14 h-14 rounded-xl bg-orange-50 text-brand-orange flex items-center justify-center mb-6">
+            <i data-lucide="utensils" class="w-7 h-7"></i>
+          </div>
+          <h3 class="font-heading font-bold text-xl text-slate-900 mb-2">Alimentação Completa</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Comida e bebida 100% inclusas: café da manhã na chegada, almoço completo, bolo comemorativo e um delicioso café da tarde.</p>
+        </div>
+
+        <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:border-brand-teal/40 transition hover:shadow-lg">
+          <div class="w-14 h-14 rounded-xl bg-teal-50 text-brand-teal flex items-center justify-center mb-6">
+            <i data-lucide="heart-handshake" class="w-7 h-7"></i>
+          </div>
+          <h3 class="font-heading font-bold text-xl text-slate-900 mb-2">Comunhão & Batismo</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">Culto de ação de graças, celebração de batismos e um ambiente acolhedor com gincanas, piscinas, esportes e edificação mútua.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="programacao" class="py-16 bg-slate-50 border-t border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-heading font-extrabold text-slate-900">Programação do Dia</h2>
+        <p class="text-slate-600 mt-2 text-sm">28 de Novembro de 2026 | Condomínio Porta do Sol - Mairinque</p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex items-start bg-white p-5 rounded-xl shadow-sm border-l-4 border-brand-orange">
+          <div class="font-heading font-black text-brand-orange text-lg w-20 flex-shrink-0">07:00</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-base">Embarque na IBFO</h4>
+            <p class="text-slate-600 text-sm">Saída dos ônibus fretados na Av. Sete de Setembro, 763 - Cipava, Osasco.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start bg-white p-5 rounded-xl shadow-sm border-l-4 border-brand-teal">
+          <div class="font-heading font-black text-brand-teal text-lg w-20 flex-shrink-0">08:30</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-base">Chegada na Chácara & Café da Manhã</h4>
+            <p class="text-slate-600 text-sm">Recepção dos irmãos, acolhimento e café da manhã coletivo.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start bg-white p-5 rounded-xl shadow-sm border-l-4 border-brand-orange">
+          <div class="font-heading font-black text-brand-orange text-lg w-20 flex-shrink-0">10:00</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-base">Culto de Ação de Graças & Celebração de Batismos</h4>
+            <p class="text-slate-600 text-sm">Momento solene de louvor, oração e testemunho público de fé.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start bg-white p-5 rounded-xl shadow-sm border-l-4 border-brand-teal">
+          <div class="font-heading font-black text-brand-teal text-lg w-20 flex-shrink-0">12:30</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-base">Almoço de Confraternização</h4>
+            <p class="text-slate-600 text-sm">Almoço completo servido para todos os participantes.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start bg-white p-5 rounded-xl shadow-sm border-l-4 border-brand-orange">
+          <div class="font-heading font-black text-brand-orange text-lg w-20 flex-shrink-0">14:00</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-base">Tarde de Lazer, Gincanas & Comunhão</h4>
+            <p class="text-slate-600 text-sm">Brincadeiras infantis, torneios recreativos e momento livre na chácara.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start bg-white p-5 rounded-xl shadow-sm border-l-4 border-brand-teal">
+          <div class="font-heading font-black text-brand-teal text-lg w-20 flex-shrink-0">16:30</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-base">Bolo & Café da Tarde</h4>
+            <p class="text-slate-600 text-sm">Celebração de encerramento com bolo comemorativo.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start bg-white p-5 rounded-xl shadow-sm border-l-4 border-slate-400">
+          <div class="font-heading font-black text-slate-600 text-lg w-20 flex-shrink-0">18:00</div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-base">Retorno para Osasco</h4>
+            <p class="text-slate-600 text-sm">Embarque de volta à sede da IBFO.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="valores" class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-heading font-extrabold text-slate-900">Valores de Contribuição</h2>
+        <p class="text-slate-600 mt-2 text-sm">Tudo incluso: Transporte ida/volta + Alimentação completa do dia</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="border-2 border-slate-200 p-6 rounded-2xl text-center">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Crianças até 6 anos</span>
+          <div class="text-3xl font-heading font-black text-brand-teal mt-3">GRÁTIS</div>
+          <p class="text-xs text-slate-500 mt-2">Isento de contribuição</p>
+        </div>
+
+        <div class="border-2 border-brand-teal bg-teal-50/40 p-6 rounded-2xl text-center">
+          <span class="text-xs font-bold text-brand-tealDark uppercase tracking-wider block">Crianças de 7 a 12 anos</span>
+          <div class="text-3xl font-heading font-black text-brand-teal mt-3">R$ 72<span class="text-sm font-normal">,00</span></div>
+          <p class="text-xs text-slate-600 mt-2">Meia entrada (50%)</p>
+        </div>
+
+        <div class="border-2 border-brand-orange bg-orange-50/40 p-6 rounded-2xl text-center relative shadow-sm">
+          <span class="bg-brand-orange text-white text-[10px] font-bold px-2 py-0.5 rounded-full absolute -top-3 left-1/2 transform -translate-x-1/2 uppercase">Padrão</span>
+          <span class="text-xs font-bold text-brand-orangeDark uppercase tracking-wider block">A partir de 13 anos</span>
+          <div class="text-3xl font-heading font-black text-brand-orange mt-3">R$ 144<span class="text-sm font-normal">,00</span></div>
+          <p class="text-xs text-slate-600 mt-2">Contribuição individual integral</p>
+        </div>
+      </div>
+      <p class="text-center text-xs text-slate-500 mt-6 italic">* Quem sentir no coração o desejo de contribuir com um valor adicional para apoiar outra família, fique à vontade para ajustar o total no formulário.</p>
+    </div>
+  </section>
+
+  <section id="inscricao" class="py-20 bg-slate-900 text-white">
+    <div class="max-w-3xl mx-auto px-4">
+      <div class="text-center mb-10">
+        <span class="text-brand-orange font-heading font-bold text-xs uppercase tracking-widest">Garanta sua participação</span>
+        <h2 class="text-3xl md:text-4xl font-heading font-extrabold mt-2">Formulário de Inscrição</h2>
+        <p class="text-slate-300 text-sm mt-2">Inscrições abertas até 21 de Novembro de 2026 (uma semana antes do evento).</p>
+      </div>
+
+      <form id="formInscricao" class="bg-white text-slate-800 p-6 md:p-10 rounded-2xl shadow-2xl space-y-6">
+
+        <div>
+          <h3 class="font-heading font-bold text-lg text-slate-900 border-b pb-2 mb-4 flex items-center">
+            <i data-lucide="user" class="w-5 h-5 mr-2 text-brand-orange"></i> 1. Dados do Responsável
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nome Completo *</label>
+              <input type="text" id="respNome" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" placeholder="Ex: João da Silva">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">RG do Responsável *</label>
+              <input type="text" id="respRG" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" placeholder="Ex: 12.345.678-9">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Telefone *</label>
+              <input type="tel" id="respTel" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" placeholder="(11) 99999-9999">
+              <p id="avisoTelefone" class="hidden text-[11px] text-brand-tealDark font-semibold mt-1"></p>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Faixa Etária do Responsável *</label>
+              <select id="respFaixa" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" onchange="calcularTotalMinimo()">
+                <option value="144">Adulto / Acima de 13 anos (R$ 144,00)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-heading font-bold text-lg text-slate-900 border-b pb-2 mb-4 flex items-center">
+            <i data-lucide="users" class="w-5 h-5 mr-2 text-brand-teal"></i> 2. Familiares Acompanhantes
+          </h3>
+          <div class="mb-4">
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Quantos familiares irão com você? (Além de você)</label>
+            <input type="number" id="qtdFamiliares" min="0" max="15" value="0" class="w-full md:w-48 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-teal focus:outline-none" onchange="renderizarCamposFamiliares()">
+            <p class="text-[11px] text-slate-500 mt-1">Insira os dados de todos para a listagem obrigatória do ônibus.</p>
+          </div>
+
+          <div id="containerFamiliares" class="space-y-4"></div>
+        </div>
+
+        <div>
+          <h3 class="font-heading font-bold text-lg text-slate-900 border-b pb-2 mb-4 flex items-center">
+            <i data-lucide="credit-card" class="w-5 h-5 mr-2 text-brand-orange"></i> 3. Plano de Contribuição & Pagamento via Pix
+          </h3>
+
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 flex flex-col md:flex-row justify-between items-center gap-2">
+            <div>
+              <span class="text-xs text-slate-500 font-bold uppercase block">Total Mínimo Calculado:</span>
+              <span id="lblTotalMinimo" class="text-2xl font-heading font-black text-brand-orange">R$ 144,00</span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-500 font-bold uppercase block">Total Digitado nas Parcelas:</span>
+              <span id="lblTotalDigitado" class="text-2xl font-heading font-black text-brand-teal">R$ 0,00</span>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-600 mb-3">Distribua livremente os valores nos meses disponíveis até <strong>Dezembro/2026</strong>. A soma das parcelas deve ser igual ou superior ao valor mínimo.</p>
+
+          <div id="containerParcelas" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-brand-orange hover:bg-brand-orangeDark text-white font-heading font-bold py-4 rounded-xl shadow-lg transition duration-200 text-base md:text-lg flex items-center justify-center space-x-2">
+          <span>Confirmar Inscrição e Enviar</span>
+          <i data-lucide="check-circle" class="w-5 h-5"></i>
+        </button>
+
+        <div id="msgValidacao" class="hidden p-4 rounded-xl text-sm font-semibold text-center"></div>
+
+        <div id="containerPix" class="hidden">
+          <h3 class="font-heading font-bold text-lg text-slate-900 border-b pb-2 mb-4 flex items-center">
+            <i data-lucide="qr-code" class="w-5 h-5 mr-2 text-brand-teal"></i> Seus códigos Pix por parcela
+          </h3>
+          <p class="text-xs text-slate-500 mb-4">Guarde ou salve os QR Codes abaixo. Pague cada um no mês indicado — cada código já vem com o valor certo.</p>
+          <div id="cartoesPix" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section id="faq" class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-heading font-extrabold text-slate-900">Perguntas Frequentes (FAQ)</h2>
+      </div>
+
+      <div class="space-y-4">
+        <details class="group bg-slate-50 p-5 rounded-xl border border-slate-200 cursor-pointer">
+          <summary class="font-heading font-bold text-slate-800 flex justify-between items-center list-none">
+            <span>Preciso pagar o valor integral de uma só vez?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <p class="text-slate-600 text-sm mt-3 leading-relaxed">Não! Você pode parcelar via Pix até dezembro/2026 conforme seu planejamento financeiro. Basta indicar o valor de cada parcela no formulário.</p>
+        </details>
+
+        <details class="group bg-slate-50 p-5 rounded-xl border border-slate-200 cursor-pointer">
+          <summary class="font-heading font-bold text-slate-800 flex justify-between items-center list-none">
+            <span>Posso ir com meu próprio carro em vez do ônibus?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <p class="text-slate-600 text-sm mt-3 leading-relaxed">Sim! A chácara no condomínio Porta do Sol possui estacionamento. No entanto, solicitamos que informe os dados de todos na inscrição para controle de portaria do condomínio.</p>
+        </details>
+
+        <details class="group bg-slate-50 p-5 rounded-xl border border-slate-200 cursor-pointer">
+          <summary class="font-heading font-bold text-slate-800 flex justify-between items-center list-none">
+            <span>O que preciso levar no dia?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"></i>
+          </summary>
+          <p class="text-slate-600 text-sm mt-3 leading-relaxed">Roupa confortável, traje de banho apropriado (caso deseje usar a piscina), toalha, protetor solar, repelente e sua Bíblia para o momento devocional.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-brand-dark text-slate-400 py-12 text-sm border-t border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="text-center md:text-left">
+        <h4 class="font-heading font-bold text-white text-base">IBFO - Igreja Batista da Família em Osasco</h4>
+        <p class="text-xs text-slate-400 mt-1">Av. Sete de Setembro, 763 - Cipava - Osasco - SP</p>
+        <a href="https://www.ibfo.com.br" target="_blank" class="text-xs text-brand-teal hover:underline mt-1 inline-block">www.ibfo.com.br</a>
+      </div>
+      <div class="text-center md:text-right text-xs">
+        <p>© 2026 Confraternização IBFO, IBFS e CTAT.</p>
+        <p class="text-slate-500 mt-1">"Não há salvação em nenhum outro..." Atos 4:12</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // >>>>>>>>> PREENCHA ESTAS TRÊS CONSTANTES ANTES DE PUBLICAR <<<<<<<<<<
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz--PBwexN2fVk7BOGUUF0SifB50Or0WY0wSVpY0Xah_fOIeWze1IJ835QRtR4SxOlDUA/exec";
+    const PIX_CHAVE = "COLE_AQUI_A_CHAVE_PIX_DA_IBFO";
+    const PIX_BENEFICIARIO = "IBFO CONFRA2026"; // máx. 25 caracteres
+    const PIX_CIDADE = "OSASCO"; // máx. 15 caracteres
+
+    function crc16Pix(payload) {
+      let polinomio = 0x1021;
+      let resultado = 0xFFFF;
+      for (let i = 0; i < payload.length; i++) {
+        resultado ^= (payload.charCodeAt(i) << 8);
+        for (let j = 0; j < 8; j++) {
+          if ((resultado & 0x8000) !== 0) {
+            resultado = ((resultado << 1) ^ polinomio) & 0xFFFF;
+          } else {
+            resultado = (resultado << 1) & 0xFFFF;
+          }
+        }
+      }
+      return resultado.toString(16).toUpperCase().padStart(4, '0');
+    }
+
+    function tlvPix(id, value) {
+      const len = value.length.toString().padStart(2, '0');
+      return id + len + value;
+    }
+
+    function montarPayloadPix({ valor, identificador }) {
+      const gui = tlvPix('00', 'BR.GOV.BCB.PIX');
+      const chaveField = tlvPix('01', PIX_CHAVE);
+      const merchantAccount = tlvPix('26', gui + chaveField);
+
+      const payloadFormat = tlvPix('00', '01');
+      const poi = tlvPix('01', '12');
+      const mcc = tlvPix('52', '0000');
+      const currency = tlvPix('53', '986');
+      const amount = tlvPix('54', Number(valor).toFixed(2));
+      const country = tlvPix('58', 'BR');
+      const name = tlvPix('59', PIX_BENEFICIARIO.substring(0, 25));
+      const city = tlvPix('60', PIX_CIDADE.substring(0, 15));
+      const txid = tlvPix('05', (identificador || '***').substring(0, 25));
+      const additional = tlvPix('62', txid);
+
+      let semCRC = payloadFormat + poi + merchantAccount + mcc + currency + amount + country + name + city + additional + '6304';
+      return semCRC + crc16Pix(semCRC);
+    }
+
+    function slugPix(str) {
+      return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    }
+
+    function renderizarCartoesPix(respNome, respTel, parcelas) {
+      const wrap = document.getElementById('containerPix');
+      const container = document.getElementById('cartoesPix');
+      container.innerHTML = '';
+      wrap.classList.remove('hidden');
+
+      const telSlug = (respTel || '').replace(/\D/g, '').slice(-8);
+      const nomeSlug = slugPix(respNome).substring(0, 10);
+
+      parcelas.forEach(p => {
+        if (!p.valor || p.valor <= 0) return;
+        const identificador = `${nomeSlug}${telSlug}${p.mes}`.substring(0, 25);
+        const payload = montarPayloadPix({ valor: p.valor, identificador });
+
+        const card = document.createElement('div');
+        card.className = 'bg-white border-2 border-brand-teal/30 rounded-xl p-4 flex flex-col items-center text-center';
+        const qrId = 'qr_' + p.mes + '_' + Math.random().toString(36).slice(2, 7);
+        card.innerHTML = `
+          <span class="text-xs font-bold text-brand-orangeDark uppercase mb-2">${p.mes}/26 — R$ ${p.valor.toFixed(2).replace('.', ',')}</span>
+          <div id="${qrId}" class="my-1"></div>
+          <textarea readonly class="w-full text-[10px] font-mono border rounded p-2 my-2 h-16 resize-none">${payload}</textarea>
+          <button type="button" class="text-xs font-bold text-brand-teal underline" onclick="navigator.clipboard.writeText(this.previousElementSibling.value)">Copiar código</button>
+        `;
+        container.appendChild(card);
+        new QRCode(document.getElementById(qrId), { text: payload, width: 130, height: 130 });
+      });
+
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ---------- Busca automática por telefone (identificação sem login) ----------
+    let debounceTelefone;
+    document.getElementById('respTel').addEventListener('input', function () {
+      clearTimeout(debounceTelefone);
+      const tel = this.value.replace(/\D/g, '');
+      const aviso = document.getElementById('avisoTelefone');
+      if (aviso) aviso.classList.add('hidden');
+      if (tel.length < 10) return;
+      debounceTelefone = setTimeout(() => buscarCadastroPorTelefone(tel), 600);
+    });
+
+    function buscarCadastroPorTelefone(tel) {
+      const antigo = document.getElementById('jsonpBusca');
+      if (antigo) antigo.remove();
+      const script = document.createElement('script');
+      script.id = 'jsonpBusca';
+      script.src = `${APPS_SCRIPT_URL}?telefone=${tel}&callback=preencherDadosPix&cb=${Date.now()}`;
+      document.body.appendChild(script);
+    }
+
+    window.preencherDadosPix = function (data) {
+      const aviso = document.getElementById('avisoTelefone');
+      if (!data || !data.encontrado) return;
+
+      document.getElementById('respNome').value = data.respNome || '';
+      document.getElementById('respRG').value = data.respRG || '';
+
+      if (aviso) {
+        aviso.textContent = 'Encontramos um cadastro anterior — carregamos seus dados para você revisar e ajustar.';
+        aviso.classList.remove('hidden');
+      }
+
+      try {
+        const familiares = JSON.parse(data.familiares || '[]');
+        document.getElementById('qtdFamiliares').value = familiares.length;
+        renderizarCamposFamiliares();
+        const blocos = document.querySelectorAll('#containerFamiliares > div');
+        familiares.forEach((f, i) => {
+          if (!blocos[i]) return;
+          const campos = blocos[i].querySelectorAll('input, select');
+          campos[0].value = f.nome || '';
+          campos[1].value = f.rg || '';
+          campos[2].value = f.faixaValor || '144';
+        });
+        calcularTotalMinimo();
+      } catch (err) {}
+
+      try {
+        const parcelas = data.parcelas || {};
+        Object.keys(parcelas).forEach(mes => {
+          const info = parcelas[mes];
+          const input = document.querySelector(`.input-parcela[data-mes="${mes}"]`);
+          if (!input) return;
+          input.value = info.valor || 0;
+          if (info.confirmado) {
+            input.disabled = true;
+            input.dataset.confirmado = 'true';
+            input.classList.add('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+            const label = input.closest('div').previousElementSibling;
+            if (label && !label.dataset.marcado) {
+              label.textContent += ' ✓ pago';
+              label.dataset.marcado = '1';
+            }
+          }
+        });
+        atualizarSomaParcelas();
+      } catch (err) {}
+    };
+
+    lucide.createIcons();
+
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-slide');
+    if (slides.length > 0) {
+      setInterval(() => {
+        slides[currentSlide].classList.remove('opacity-100');
+        slides[currentSlide].classList.add('opacity-0');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.remove('opacity-0');
+        slides[currentSlide].classList.add('opacity-100');
+      }, 5000);
+    }
+
+    const targetDate = new Date('2026-11-28T07:00:00-03:00').getTime();
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        document.getElementById('days').innerText = String(days).padStart(2, '0');
+        document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+        document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
+        document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+      }
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    function renderizarCamposFamiliares() {
+      const qtd = parseInt(document.getElementById('qtdFamiliares').value) || 0;
+      const container = document.getElementById('containerFamiliares');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= qtd; i++) {
+        const div = document.createElement('div');
+        div.className = 'p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-3';
+        div.innerHTML = `
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Nome Familiar ${i} *</label>
+            <input type="text" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-brand-teal focus:outline-none" placeholder="Nome completo">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">RG Familiar ${i} *</label>
+            <input type="text" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-brand-teal focus:outline-none" placeholder="RG">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Faixa Etária *</label>
+            <select class="select-faixa w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-brand-teal focus:outline-none" onchange="calcularTotalMinimo()">
+              <option value="144">A partir de 13 anos (R$ 144)</option>
+              <option value="72">7 a 12 anos (Meia - R$ 72)</option>
+              <option value="0">Até 6 anos (Grátis - R$ 0)</option>
+            </select>
+          </div>
+        `;
+        container.appendChild(div);
+      }
+      calcularTotalMinimo();
+    }
+
+    const mesesNomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+    function montarCamposParcelas() {
+      const container = document.getElementById('containerParcelas');
+      container.innerHTML = '';
+      const mesAtual = new Date().getMonth();
+
+      for (let m = mesAtual; m <= 11; m++) {
+        const div = document.createElement('div');
+        div.className = 'bg-white p-3 border rounded-xl shadow-xs';
+        div.innerHTML = `
+          <label class="block text-[11px] font-black text-slate-700 uppercase mb-1 text-center">${mesesNomes[m]}/26</label>
+          <div class="relative">
+            <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">R$</span>
+            <input type="number" step="0.01" min="0" value="0" data-mes="${mesesNomes[m]}" class="input-parcela w-full pl-8 pr-2 py-1.5 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-brand-orange focus:outline-none text-right" oninput="atualizarSomaParcelas()">
+          </div>
+        `;
+        container.appendChild(div);
+      }
+      atualizarSomaParcelas();
+    }
+
+    let totalMinimoGeral = 144;
+
+    function calcularTotalMinimo() {
+      let total = 144;
+      const selects = document.querySelectorAll('.select-faixa');
+      selects.forEach(select => {
+        total += parseFloat(select.value);
+      });
+      totalMinimoGeral = total;
+      document.getElementById('lblTotalMinimo').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+      atualizarSomaParcelas();
+    }
+
+    function atualizarSomaParcelas() {
+      let soma = 0;
+      const inputs = document.querySelectorAll('.input-parcela');
+      inputs.forEach(input => {
+        soma += parseFloat(input.value) || 0;
+      });
+      const lblDigitado = document.getElementById('lblTotalDigitado');
+      lblDigitado.innerText = `R$ ${soma.toFixed(2).replace('.', ',')}`;
+
+      if (soma >= totalMinimoGeral) {
+        lblDigitado.className = "text-2xl font-heading font-black text-brand-teal";
+      } else {
+        lblDigitado.className = "text-2xl font-heading font-black text-brand-orange";
+      }
+      return soma;
+    }
+
+    montarCamposParcelas();
+
+    document.getElementById('formInscricao').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const somaDigitada = atualizarSomaParcelas();
+      const msgBox = document.getElementById('msgValidacao');
+      msgBox.classList.remove('hidden');
+
+      if (somaDigitada < totalMinimoGeral) {
+        msgBox.className = 'p-4 rounded-xl text-sm font-semibold text-center bg-red-100 text-red-700 border border-red-200';
+        msgBox.innerHTML = `O total digitado nas parcelas (R$ ${somaDigitada.toFixed(2).replace('.', ',')}) é inferior ao valor mínimo necessário (R$ ${totalMinimoGeral.toFixed(2).replace('.', ',')}). Por favor, ajuste os valores nos meses correspondentes.`;
+      } else {
+        msgBox.className = 'p-4 rounded-xl text-sm font-semibold text-center bg-teal-100 text-teal-800 border border-teal-200';
+        msgBox.innerHTML = `Inscrição validada com sucesso! Total planejado: R$ ${somaDigitada.toFixed(2).replace('.', ',')}. Seus códigos Pix estão logo abaixo.`;
+
+        const respNome = document.getElementById('respNome').value;
+        const respRG = document.getElementById('respRG').value;
+        const respTel = document.getElementById('respTel').value;
+
+        const familiares = Array.from(document.querySelectorAll('#containerFamiliares > div')).map(div => {
+          const campos = div.querySelectorAll('input, select');
+          return { nome: campos[0].value, rg: campos[1].value, faixaValor: campos[2].value };
+        });
+
+        const parcelas = Array.from(document.querySelectorAll('.input-parcela'))
+          .filter(inp => inp.dataset.confirmado !== 'true')
+          .map(inp => ({
+            mes: inp.dataset.mes,
+            valor: parseFloat(inp.value) || 0
+          }));
+
+        const payloadPlanilha = {
+          respNome, respRG, respTel,
+          totalMinimo: totalMinimoGeral,
+          totalDigitado: somaDigitada,
+          familiares: JSON.stringify(familiares),
+          parcelas: JSON.stringify(parcelas)
+        };
+
+        fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payloadPlanilha)
+        }).catch(() => {});
+
+        renderizarCartoesPix(respNome, respTel, parcelas);
+      }
+    });
+  </script>
+</body>
+</html>
