@@ -693,10 +693,18 @@
         msgBox.className = 'p-4 rounded-xl text-sm font-semibold text-center bg-red-100 text-red-700 border border-red-200';
         msgBox.innerHTML = `O total digitado nas parcelas (R$ ${somaDigitada.toFixed(2).replace('.', ',')}) é inferior ao valor mínimo necessário (R$ ${totalMinimoGeral.toFixed(2).replace('.', ',')}). Por favor, ajuste os valores nos meses correspondentes.`;
       } else {
-        msgBox.className = 'p-4 rounded-xl text-sm font-semibold text-center bg-teal-100 text-teal-800 border border-teal-200';
-        msgBox.innerHTML = `Inscrição validada com sucesso! Total planejado: R$ ${somaDigitada.toFixed(2).replace('.', ',')}. Seus códigos Pix estão logo abaixo.`;
+        msgBox.className = 'p-5 rounded-xl text-left bg-teal-50 border-2 border-brand-teal';
 
         const respNome = document.getElementById('respNome').value;
+        const primeiroNome = respNome.trim().split(' ')[0] || '';
+
+        msgBox.innerHTML = `
+          <div class="text-3xl mb-2 text-center">🎉</div>
+          <p class="font-heading font-bold text-brand-tealDark text-base mb-2">Olá, Irmão(ã) ${primeiroNome}! Graça e paz!</p>
+          <p class="text-sm text-slate-700 leading-relaxed">Sua inscrição para o <strong>CONFRA2026</strong> da IBFO está confirmada! Não perca os avisos nos cultos e continue orando, porque esse será um dia incrível.</p>
+          <p class="text-sm font-bold text-brand-orangeDark mt-2">Que dia feliz! #CONFRA2026</p>
+          <p class="text-xs text-slate-500 mt-3 pt-3 border-t border-teal-200">Total planejado: R$ ${somaDigitada.toFixed(2).replace('.', ',')} · Seus códigos Pix estão logo abaixo.</p>
+        `;
         const respRG = document.getElementById('respRG').value;
         const respTel = document.getElementById('respTel').value;
         const vaiOnibus = document.getElementById('vaiOnibus').value;
