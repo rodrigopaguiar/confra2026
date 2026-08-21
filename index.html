@@ -270,6 +270,10 @@
               <p id="avisoTelefone" class="hidden text-[11px] text-brand-tealDark font-semibold mt-1"></p>
             </div>
             <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">E-mail *</label>
+              <input type="email" id="respEmail" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" placeholder="seuemail@exemplo.com">
+            </div>
+            <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nome Completo *</label>
               <input type="text" id="respNome" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" placeholder="Ex: João da Silva">
             </div>
@@ -521,6 +525,7 @@
 
       document.getElementById('respNome').value = data.respNome || '';
       document.getElementById('respRG').value = data.respRG || '';
+      document.getElementById('respEmail').value = data.respEmail || '';
       document.getElementById('vaiOnibus').value = data.vaiOnibus || 'Sim';
 
       if (aviso) {
@@ -707,6 +712,7 @@
         `;
         const respRG = document.getElementById('respRG').value;
         const respTel = document.getElementById('respTel').value;
+        const respEmail = document.getElementById('respEmail').value;
         const vaiOnibus = document.getElementById('vaiOnibus').value;
 
         const familiares = Array.from(document.querySelectorAll('#containerFamiliares > div')).map(div => {
@@ -722,7 +728,7 @@
           }));
 
         const payloadPlanilha = {
-          respNome, respRG, respTel, vaiOnibus,
+          respNome, respRG, respTel, respEmail, vaiOnibus,
           totalMinimo: totalMinimoGeral,
           totalDigitado: somaDigitada,
           familiares: JSON.stringify(familiares),

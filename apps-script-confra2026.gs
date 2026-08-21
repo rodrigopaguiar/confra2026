@@ -15,6 +15,11 @@
  *    N: Valor Nov      O: Confirmado Nov
  *    P: Valor Dez      Q: Confirmado Dez
  *    R: Vai de Onibus (Sim / Nao)
+ *    S: Email
+ *
+ * ENVIO AUTOMATICO DE EMAIL: ao confirmar um cadastro NOVO (nao em edicoes), o script envia
+ * automaticamente um email de confirmacao para o endereco informado, usando a propria conta
+ * Google desta planilha (MailApp) — gratuito, sem necessidade de configurar nada a mais.
  * 3. A coluna "Confirmado <Mês>" é de texto livre: a Secretaria escreve QUALQUER coisa
  *    (ex: "OK", "PAGO", a data, um "x") para marcar como confirmado. Deixar a célula em
  *    branco significa que a parcela ainda está pendente. Não precisa ser um valor específico.
@@ -60,7 +65,7 @@ function doPost(e) {
     }
   }
 
-  var novaLinha = new Array(18);
+  var novaLinha = new Array(19);
   novaLinha[0] = new Date();
   novaLinha[1] = data.respNome || '';
   novaLinha[2] = data.respRG || '';
@@ -69,6 +74,7 @@ function doPost(e) {
   novaLinha[5] = data.totalDigitado || '';
   novaLinha[6] = data.familiares || '[]';
   novaLinha[17] = data.vaiOnibus || 'Sim';
+  novaLinha[18] = data.respEmail || '';
 
   for (var mes in MESES_COLS) {
     var col = MESES_COLS[mes];
@@ -89,14 +95,37 @@ function doPost(e) {
     }
   }
 
+  var eraCadastroNovo = linhaExistente <= 0;
+
   if (linhaExistente > 0) {
     sheet.getRange(linhaExistente, 1, 1, novaLinha.length).setValues([novaLinha]);
   } else {
     sheet.appendRow(novaLinha);
   }
 
+  if (eraCadastroNovo) {
+    enviarEmailConfirmacao(data.respNome, data.respEmail);
+  }
+
   return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function enviarEmailConfirmacao(nome, email) {
+  if (!email) return;
+  var primeiroNome = (nome || '').trim().split(' ')[0] || '';
+  var assunto = 'Inscrição confirmada — CONFRA2026';
+  var corpo =
+    'Olá, Irmão(ã) ' + primeiroNome + '! Graça e paz!\n\n' +
+    'Sua inscrição para o CONFRA2026 da IBFO está confirmada!\n' +
+    'Não perca os avisos nos cultos e continue orando, porque esse será um dia incrível.\n\n' +
+    'Que dia feliz! #CONFRA2026';
+  try {
+    MailApp.sendEmail(email, assunto, corpo);
+  } catch (err) {
+    // Se o envio falhar por qualquer motivo, o cadastro já foi gravado normalmente,
+    // então não interrompemos o fluxo por causa disso.
+  }
 }
 
 function doGet(e) {
@@ -130,6 +159,7 @@ function buscarPorTelefone(e) {
         respRG: linhas[i][2] || '',
         familiares: linhas[i][6] || '[]',
         vaiOnibus: linhas[i][17] || 'Sim',
+        respEmail: linhas[i][18] || '',
         parcelas: parcelas
       };
       break;
