@@ -265,6 +265,11 @@
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Telefone *</label>
+              <input type="tel" id="respTel" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" placeholder="(11) 99999-9999">
+              <p id="avisoTelefone" class="hidden text-[11px] text-brand-tealDark font-semibold mt-1"></p>
+            </div>
+            <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nome Completo *</label>
               <input type="text" id="respNome" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" placeholder="Ex: João da Silva">
             </div>
@@ -273,13 +278,8 @@
               <input type="text" id="respRG" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" placeholder="Ex: 12.345.678-9">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Telefone *</label>
-              <input type="tel" id="respTel" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" placeholder="(11) 99999-9999">
-              <p id="avisoTelefone" class="hidden text-[11px] text-brand-tealDark font-semibold mt-1"></p>
-            </div>
-            <div>
               <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Faixa Etária do Responsável *</label>
-              <select id="respFaixa" class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" onchange="calcularTotalMinimo()">
+              <select id="respFaixa" required class="w-full border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-orange focus:outline-none" onchange="calcularTotalMinimo()">
                 <option value="144">Adulto / Acima de 13 anos (R$ 144,00)</option>
               </select>
             </div>
@@ -292,13 +292,13 @@
           </h3>
           <div class="mb-4">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Quantos familiares irão com você? (Além de você)</label>
-            <input type="number" id="qtdFamiliares" min="0" max="15" value="0" class="w-full md:w-48 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-teal focus:outline-none" onchange="renderizarCamposFamiliares()">
+            <input type="number" id="qtdFamiliares" required min="0" max="15" value="0" class="w-full md:w-48 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-teal focus:outline-none" onchange="renderizarCamposFamiliares()">
             <p class="text-[11px] text-slate-500 mt-1">Insira os dados de todos para a listagem obrigatória do ônibus.</p>
           </div>
 
           <div class="mb-4">
-            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Vocês irão de ônibus fretado?</label>
-            <select id="vaiOnibus" class="w-full md:w-64 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-teal focus:outline-none">
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Vocês irão de ônibus fretado? *</label>
+            <select id="vaiOnibus" required class="w-full md:w-64 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-teal focus:outline-none">
               <option value="Sim">Sim, toda a família vai de ônibus</option>
               <option value="Não">Não, vamos por conta própria</option>
             </select>
@@ -618,7 +618,7 @@
           </div>
           <div>
             <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Faixa Etária *</label>
-            <select class="select-faixa w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-brand-teal focus:outline-none" onchange="calcularTotalMinimo()">
+            <select class="select-faixa w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-brand-teal focus:outline-none" required onchange="calcularTotalMinimo()">
               <option value="144">A partir de 13 anos (R$ 144)</option>
               <option value="72">7 a 12 anos (Meia - R$ 72)</option>
               <option value="0">Até 6 anos (Grátis - R$ 0)</option>
