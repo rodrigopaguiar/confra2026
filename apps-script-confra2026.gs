@@ -14,6 +14,7 @@
  *    L: Valor Out      M: Confirmado Out
  *    N: Valor Nov      O: Confirmado Nov
  *    P: Valor Dez      Q: Confirmado Dez
+ *    R: Vai de Onibus (Sim / Nao)
  * 3. A coluna "Confirmado <Mês>" é de texto livre: a Secretaria escreve QUALQUER coisa
  *    (ex: "OK", "PAGO", a data, um "x") para marcar como confirmado. Deixar a célula em
  *    branco significa que a parcela ainda está pendente. Não precisa ser um valor específico.
@@ -59,7 +60,7 @@ function doPost(e) {
     }
   }
 
-  var novaLinha = new Array(17);
+  var novaLinha = new Array(18);
   novaLinha[0] = new Date();
   novaLinha[1] = data.respNome || '';
   novaLinha[2] = data.respRG || '';
@@ -67,6 +68,7 @@ function doPost(e) {
   novaLinha[4] = data.totalMinimo || '';
   novaLinha[5] = data.totalDigitado || '';
   novaLinha[6] = data.familiares || '[]';
+  novaLinha[17] = data.vaiOnibus || 'Sim';
 
   for (var mes in MESES_COLS) {
     var col = MESES_COLS[mes];
@@ -127,6 +129,7 @@ function buscarPorTelefone(e) {
         respNome: linhas[i][1] || '',
         respRG: linhas[i][2] || '',
         familiares: linhas[i][6] || '[]',
+        vaiOnibus: linhas[i][17] || 'Sim',
         parcelas: parcelas
       };
       break;

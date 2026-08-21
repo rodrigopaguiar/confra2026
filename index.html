@@ -296,6 +296,15 @@
             <p class="text-[11px] text-slate-500 mt-1">Insira os dados de todos para a listagem obrigatória do ônibus.</p>
           </div>
 
+          <div class="mb-4">
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Vocês irão de ônibus fretado?</label>
+            <select id="vaiOnibus" class="w-full md:w-64 border border-slate-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-teal focus:outline-none">
+              <option value="Sim">Sim, toda a família vai de ônibus</option>
+              <option value="Não">Não, vamos por conta própria</option>
+            </select>
+            <p class="text-[11px] text-slate-500 mt-1">Essa resposta vale para você e todos os familiares informados acima.</p>
+          </div>
+
           <div id="containerFamiliares" class="space-y-4"></div>
         </div>
 
@@ -512,6 +521,7 @@
 
       document.getElementById('respNome').value = data.respNome || '';
       document.getElementById('respRG').value = data.respRG || '';
+      document.getElementById('vaiOnibus').value = data.vaiOnibus || 'Sim';
 
       if (aviso) {
         aviso.textContent = 'Encontramos um cadastro anterior — carregamos seus dados para você revisar e ajustar.';
@@ -689,6 +699,7 @@
         const respNome = document.getElementById('respNome').value;
         const respRG = document.getElementById('respRG').value;
         const respTel = document.getElementById('respTel').value;
+        const vaiOnibus = document.getElementById('vaiOnibus').value;
 
         const familiares = Array.from(document.querySelectorAll('#containerFamiliares > div')).map(div => {
           const campos = div.querySelectorAll('input, select');
@@ -703,7 +714,7 @@
           }));
 
         const payloadPlanilha = {
-          respNome, respRG, respTel,
+          respNome, respRG, respTel, vaiOnibus,
           totalMinimo: totalMinimoGeral,
           totalDigitado: somaDigitada,
           familiares: JSON.stringify(familiares),
