@@ -391,3 +391,19 @@ function buscarPorTelefone(e) {
   var saida = callback + '(' + JSON.stringify(resultado) + ');';
   return ContentService.createTextOutput(saida).setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
+
+/**
+ * FUNÇÃO DE TESTE MANUAL — não é usada pelo formulário, é só para você diagnosticar.
+ * Troque o e-mail abaixo pelo seu, selecione "testeEnviarEmail" no menu de funções lá em
+ * cima do editor (ao lado do botão "Executar"), e clique em Executar. O resultado (sucesso
+ * ou o erro exato) aparece no painel "Registro de execução" na parte de baixo do editor.
+ */
+function testeEnviarEmail() {
+  var emailTeste = 'COLOQUE_SEU_EMAIL_AQUI@gmail.com';
+  var parcelasTeste = [
+    { mes: 'Ago', valor: 50 },
+    { mes: 'Set', valor: 50 }
+  ];
+  enviarEmailConfirmacao('Rodrigo Teste', emailTeste, 100, 'Sim', parcelasTeste);
+  Logger.log('Função de teste concluída — confira as mensagens acima.');
+}
