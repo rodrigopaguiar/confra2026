@@ -107,7 +107,10 @@ function doPost(e) {
   }
 
   if (eraCadastroNovo) {
+    Logger.log('Cadastro NOVO detectado (telefone: ' + telefoneNormalizado + '). Disparando e-mail para: ' + data.respEmail);
     enviarEmailConfirmacao(data.respNome, data.respEmail, data.totalDigitado, data.vaiOnibus, parcelasEnviadas);
+  } else {
+    Logger.log('Cadastro EXISTENTE (edição, telefone: ' + telefoneNormalizado + '). E-mail não enviado por design.');
   }
 
   return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
@@ -338,9 +341,12 @@ function enviarEmailConfirmacao(nome, email, totalPlanejado, vaiOnibus, parcelas
       subject: 'Inscrição confirmada — CONFRA2026',
       htmlBody: html
     });
+    Logger.log('E-mail de confirmação enviado com sucesso para: ' + email);
   } catch (err) {
     // Se o envio falhar por qualquer motivo, o cadastro já foi gravado normalmente,
-    // então não interrompemos o fluxo por causa disso.
+    // então não interrompemos o fluxo por causa disso — mas registramos o erro para
+    // conseguirmos diagnosticar depois, em Execuções.
+    Logger.log('FALHA ao enviar e-mail para ' + email + ': ' + err.message);
   }
 }
 
