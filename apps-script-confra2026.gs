@@ -404,6 +404,27 @@ function testeEnviarEmail() {
     { mes: 'Ago', valor: 50 },
     { mes: 'Set', valor: 50 }
   ];
-  enviarEmailConfirmacao('Rodrigo Teste', emailTeste, 100, 'Sim', parcelasTeste);
-  Logger.log('Função de teste concluída — confira as mensagens acima.');
+  try {
+    enviarEmailConfirmacao('Rodrigo Teste', emailTeste, 100, 'Sim', parcelasTeste);
+    Logger.log('Função de teste concluída — confira as mensagens acima.');
+  } catch (err) {
+    Logger.log('ERRO CAPTURADO em testeEnviarEmail: ' + err.toString());
+    Logger.log('Stack: ' + err.stack);
+  }
+}
+
+/**
+ * TESTE MÍNIMO — envia um e-mail de texto simples, sem template nenhum, só para
+ * confirmar se o problema é no MailApp/permissão em si, ou especificamente no template HTML.
+ * Troque o e-mail abaixo, selecione "testeEnviarEmailSimples" e execute.
+ */
+function testeEnviarEmailSimples() {
+  var emailTeste = 'COLOQUE_SEU_EMAIL_AQUI@gmail.com';
+  try {
+    MailApp.sendEmail(emailTeste, 'Teste simples CONFRA2026', 'Se você recebeu isso, o envio básico está funcionando.');
+    Logger.log('E-mail simples enviado com sucesso para: ' + emailTeste);
+  } catch (err) {
+    Logger.log('ERRO no envio simples: ' + err.toString());
+    Logger.log('Stack: ' + err.stack);
+  }
 }
