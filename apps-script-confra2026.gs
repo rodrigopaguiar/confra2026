@@ -428,3 +428,12 @@ function testeEnviarEmailSimples() {
     Logger.log('Stack: ' + err.stack);
   }
 }
+
+/**
+ * TESTE TRIVIAL — não usa nenhuma API externa (nem planilha, nem e-mail). Serve só para
+ * confirmar se o botão "Executar" funciona normalmente nesta sessão, isolado de qualquer
+ * questão de permissão de MailApp.
+ */
+function testeTrivial() {
+  Logger.log('Isso é um teste trivial, sem nenhuma API externa. Se você está lendo isso, o botão Executar funciona normalmente.');
+}
