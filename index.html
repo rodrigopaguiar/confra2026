@@ -565,23 +565,54 @@
       } catch (err) {}
 
       try {
+        const MESES_ORDEM = [
+          { codigo: 'Ago', idx: 7 }, { codigo: 'Set', idx: 8 }, { codigo: 'Out', idx: 9 },
+          { codigo: 'Nov', idx: 10 }, { codigo: 'Dez', idx: 11 }
+        ];
         const parcelas = data.parcelas || {};
-        Object.keys(parcelas).forEach(mes => {
-          const info = parcelas[mes];
-          const input = document.querySelector(`.input-parcela[data-mes="${mes}"]`);
-          if (!input) return;
-          input.value = info.valor || 0;
+        const mesAtualIdx = new Date().getMonth();
+        let temPendenciaAtrasada = false;
+
+        const mesesParaMostrar = MESES_ORDEM.filter(m => {
+          const info = parcelas[m.codigo];
+          const temValorOuConfirmacao = info && (Number(info.valor) > 0 || info.confirmado);
+          return m.idx >= mesAtualIdx || temValorOuConfirmacao;
+        });
+
+        const container = document.getElementById('containerParcelas');
+        container.innerHTML = '';
+
+        mesesParaMostrar.forEach(m => {
+          const info = parcelas[m.codigo] || { valor: 0, confirmado: false };
+          const isAtrasado = m.idx < mesAtualIdx && !info.confirmado && Number(info.valor) > 0;
+          if (isAtrasado) temPendenciaAtrasada = true;
+
+          const div = document.createElement('div');
+          div.className = 'bg-white p-3 border rounded-xl shadow-xs' + (isAtrasado ? ' ring-2 ring-brand-orange' : '');
+          div.innerHTML = `
+            <label class="block text-[11px] font-black uppercase mb-1 text-center ${isAtrasado ? 'text-brand-orangeDark' : 'text-slate-700'}">${mesesNomes[m.idx]}/26${isAtrasado ? ' ⚠️' : ''}${info.confirmado ? ' ✓ pago' : ''}</label>
+            <div class="relative">
+              <span class="absolute left-2.5 top-2 text-xs text-slate-400 font-bold">R$</span>
+              <input type="number" step="0.01" min="0" value="${info.valor || 0}" data-mes="${m.codigo}" class="input-parcela w-full pl-8 pr-2 py-1.5 border border-slate-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-brand-orange focus:outline-none text-right" oninput="atualizarSomaParcelas()">
+            </div>
+          `;
+          container.appendChild(div);
+
           if (info.confirmado) {
+            const input = div.querySelector('.input-parcela');
             input.disabled = true;
             input.dataset.confirmado = 'true';
             input.classList.add('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
-            const label = input.closest('div').previousElementSibling;
-            if (label && !label.dataset.marcado) {
-              label.textContent += ' ✓ pago';
-              label.dataset.marcado = '1';
-            }
           }
         });
+
+        if (temPendenciaAtrasada) {
+          const avisoAtraso = document.createElement('p');
+          avisoAtraso.className = 'text-xs text-brand-orangeDark font-semibold mt-3';
+          avisoAtraso.textContent = '⚠️ Você tem uma parcela de mês anterior ainda não confirmada como paga. Pode ajustar o valor aqui, mover para outro mês, ou deixar como está — fica registrado normalmente.';
+          container.parentElement.appendChild(avisoAtraso);
+        }
+
         atualizarSomaParcelas();
       } catch (err) {}
     };
