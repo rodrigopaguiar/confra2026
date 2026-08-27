@@ -228,7 +228,17 @@
 </div>
 
 <script>
+// Cole aqui a URL do seu Apps Script (termina em /exec) depois de implantar.
+// Enquanto estiver vazia, o dashboard usa o dashboard-data.json como reserva.
+const DASHBOARD_API_URL = '';
+
 async function loadData(){
+  if (DASHBOARD_API_URL) {
+    try{
+      const res = await fetch(DASHBOARD_API_URL, {cache:'no-store'});
+      if(res.ok) return await res.json();
+    }catch(e){ /* cai para o fallback abaixo */ }
+  }
   try{
     const res = await fetch('dashboard-data.json', {cache:'no-store'});
     if(!res.ok) throw new Error('not ok');
