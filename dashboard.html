@@ -74,6 +74,7 @@
   /* progress / thermometer bar (financeiro total) */
   .goal-row{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
   .goal-row .big{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:26px; color:var(--orangeDark); }
+  .goal-row .prov-inline{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:14px; color:#F8A876; margin-left:8px; }
   .goal-row .of{ font-size:13px; color:#94a3b8; }
   .bar-track{ height:16px; background:#f1f5f9; border-radius:999px; overflow:hidden; position:relative; }
   .bar-fill{ height:100%; background:linear-gradient(90deg, var(--orange), var(--orangeDark)); border-radius:999px; position:absolute; top:0; left:0; z-index:2; }
@@ -144,7 +145,10 @@
     <div class="card">
       <h3>Arrecadação total <span class="tag">confirmado vs meta</span></h3>
       <div class="goal-row">
-        <span class="big" id="goalValue">R$ 0</span>
+        <span>
+          <span class="big" id="goalValue">R$ 0</span>
+          <span class="prov-inline" id="goalProvInline"></span>
+        </span>
         <span class="of" id="goalOf">de R$ 0</span>
       </div>
       <div class="bar-track">
@@ -154,7 +158,6 @@
       <div class="legend-row">
         <span><span class="legend-dot" style="background:var(--orange)"></span>Confirmado</span>
         <span><span class="legend-dot" style="background:#FDD9C2"></span>Provisionado (com pendentes)</span>
-        <span id="provNote" style="color:#94a3b8;"></span>
       </div>
 
       <h3 style="margin-top:28px;">Arrecadação por mês <span class="tag">confirmado x pendente</span></h3>
@@ -317,10 +320,10 @@ loadData().then(data => {
   const totalProvisionado = data.financeiro.confirmado_total + data.financeiro.a_confirmar_total;
   const pctProvisionado = Math.min(100, Math.round((totalProvisionado / data.financeiro.meta) * 100));
   document.getElementById('goalValue').textContent = fmtBRL(data.financeiro.confirmado_total);
+  document.getElementById('goalProvInline').textContent = `(${fmtBRL(totalProvisionado)} provisionado)`;
   document.getElementById('goalOf').textContent = `de ${fmtBRL(data.financeiro.meta)} (${pctMeta}%)`;
   document.getElementById('goalBar').style.width = pctMeta + '%';
   document.getElementById('goalBarProv').style.width = pctProvisionado + '%';
-  document.getElementById('provNote').textContent = `${fmtBRL(totalProvisionado)} provisionado (${pctProvisionado}% da meta)`;
 
   // Monthly chart
   const maxMonth = Math.max(...data.financeiro.por_mes.map(m => m.confirmado + m.pendente));
