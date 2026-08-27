@@ -82,8 +82,9 @@
   .legend-dot{ width:9px; height:9px; border-radius:3px; display:inline-block; margin-right:5px; }
 
   /* monthly bars */
-  .month-chart{ display:flex; align-items:flex-end; gap:14px; height:150px; padding-top:10px; }
+  .month-chart{ display:flex; align-items:flex-end; gap:14px; height:172px; padding-top:10px; }
   .month-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px; }
+  .month-total{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:11px; color:var(--dark); white-space:nowrap; }
   .month-bars{ width:100%; display:flex; flex-direction:column-reverse; justify-content:flex-start; align-items:center; height:100%; gap:2px; max-width:34px; }
   .mb-seg{ width:100%; border-radius:4px 4px 0 0; }
   .mb-seg.confirmed{ background:var(--teal); }
@@ -318,14 +319,15 @@ loadData().then(data => {
   const maxMonth = Math.max(...data.financeiro.por_mes.map(m => m.confirmado + m.pendente));
   document.getElementById('monthChart').innerHTML = data.financeiro.por_mes.map(m => {
     const total = m.confirmado + m.pendente;
-    const hTotal = Math.max(4, (total / maxMonth) * 120);
+    const hTotal = Math.max(4, (total / maxMonth) * 96);
     const hConf = total > 0 ? (m.confirmado/total) * hTotal : 0;
     const hPend = total > 0 ? (m.pendente/total) * hTotal : 0;
     return `
       <div class="month-col">
+        <div class="month-total">${fmtBRL(total)}</div>
         <div class="month-bars" style="height:${hTotal}px;">
-          <div class="mb-seg pending" style="height:${hPend}px;"></div>
-          <div class="mb-seg confirmed" style="height:${hConf}px;"></div>
+          <div class="mb-seg pending" style="height:${hPend}px;" title="Pendente: ${fmtBRL(m.pendente)}"></div>
+          <div class="mb-seg confirmed" style="height:${hConf}px;" title="Confirmado: ${fmtBRL(m.confirmado)}"></div>
         </div>
         <div class="month-label">${m.mes}</div>
       </div>
