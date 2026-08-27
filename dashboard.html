@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Executivo — CONFRA2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#F15A24;
+    --orangeDark:#D94916;
+    --teal:#00B5A5;
+    --tealDark:#008E82;
+    --dark:#1E293B;
+    --light:#F8FAFC;
+    --red:#DC2626;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Open Sans', sans-serif;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(241,90,36,.05), transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(0,181,165,.06), transparent 45%),
+      var(--light);
+    color:var(--dark);
+  }
+  h1,h2,h3,.heading{ font-family:'Montserrat',sans-serif; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:28px 20px 60px; }
+
+  /* header */
+  .topbar{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:28px; }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand .chip{ background:var(--teal); border-radius:12px; padding:8px 14px; display:flex; align-items:center; }
+  .brand .chip img{ height:34px; display:block; }
+  .brand h1{ font-size:20px; font-weight:800; margin:0; color:var(--dark); }
+  .brand .sub{ font-size:12px; color:#64748b; margin-top:1px; }
+  .updated{
+    font-family:'Montserrat',sans-serif; font-weight:700; font-size:11.5px; color:#94a3b8;
+    background:#fff; border:1.5px solid #e2e8f0; padding:7px 14px; border-radius:999px;
+  }
+  .deadlines{ display:flex; gap:10px; flex-wrap:wrap; }
+  .dl-pill{
+    font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; padding:7px 14px; border-radius:999px;
+    background:#fff; border:1.5px solid #e2e8f0; color:var(--dark); display:flex; align-items:center; gap:6px;
+  }
+  .dl-pill .n{ font-size:14px; }
+  .dl-pill.warn{ background:#FFF7ED; border-color:#FED7AA; color:var(--orangeDark); }
+
+  /* kpi row */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+  .kpi-card{
+    background:#fff; border-radius:16px; padding:20px; border:1.5px solid #e2e8f0;
+    display:flex; flex-direction:column; gap:6px; position:relative; overflow:hidden;
+  }
+  .kpi-card .accent{ position:absolute; top:0; left:0; right:0; height:4px; }
+  .kpi-card .label{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#94a3b8; }
+  .kpi-card .value{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:30px; color:var(--dark); }
+  .kpi-card .foot{ font-size:12px; color:#64748b; }
+  .kpi-card .foot b{ color:var(--dark); }
+
+  /* section */
+  .section-title{ display:flex; align-items:center; gap:10px; margin:30px 0 14px; }
+  .section-title .dot{ width:8px; height:8px; border-radius:50%; }
+  .section-title h2{ font-size:16px; font-weight:800; margin:0; color:var(--dark); }
+
+  .grid-2{ display:grid; grid-template-columns:1.3fr .7fr; gap:16px; }
+  .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .card{ background:#fff; border-radius:16px; padding:22px; border:1.5px solid #e2e8f0; }
+  .card h3{ font-size:13.5px; margin:0 0 16px; color:var(--dark); display:flex; align-items:center; justify-content:space-between; }
+  .card h3 .tag{ font-size:11px; font-weight:700; color:#94a3b8; text-transform:none; }
+
+  /* progress / thermometer bar (financeiro total) */
+  .goal-row{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+  .goal-row .big{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:26px; color:var(--orangeDark); }
+  .goal-row .of{ font-size:13px; color:#94a3b8; }
+  .bar-track{ height:16px; background:#f1f5f9; border-radius:999px; overflow:hidden; position:relative; }
+  .bar-fill{ height:100%; background:linear-gradient(90deg, var(--orange), var(--orangeDark)); border-radius:999px; }
+  .bar-fill.pending{ background:repeating-linear-gradient(135deg, #FDE68A, #FDE68A 6px, #FCD34D 6px, #FCD34D 12px); opacity:.85; }
+  .legend-row{ display:flex; gap:16px; margin-top:10px; font-size:12px; color:#64748b; }
+  .legend-dot{ width:9px; height:9px; border-radius:3px; display:inline-block; margin-right:5px; }
+
+  /* monthly bars */
+  .month-chart{ display:flex; align-items:flex-end; gap:14px; height:150px; padding-top:10px; }
+  .month-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px; }
+  .month-bars{ width:100%; display:flex; flex-direction:column-reverse; justify-content:flex-start; align-items:center; height:100%; gap:2px; max-width:34px; }
+  .mb-seg{ width:100%; border-radius:4px 4px 0 0; }
+  .mb-seg.confirmed{ background:var(--teal); }
+  .mb-seg.pending{ background:#FDE68A; border-radius:0; }
+  .mb-seg:first-child{ border-radius:0 0 0 0; }
+  .month-label{ font-size:11.5px; font-weight:700; font-family:'Montserrat',sans-serif; color:#64748b; }
+
+  /* radial gauge (onibus) */
+  .gauge-wrap{ display:flex; align-items:center; gap:20px; }
+  .gauge-num{ font-family:'Montserrat',sans-serif; }
+  .gauge-num .v{ font-size:28px; font-weight:800; color:var(--dark); display:block; }
+  .gauge-num .l{ font-size:12px; color:#94a3b8; }
+
+  /* small stat list */
+  .stat-list{ display:flex; flex-direction:column; gap:12px; }
+  .stat-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#f8fafc; border-radius:10px; }
+  .stat-row .k{ font-size:13px; color:#475569; display:flex; align-items:center; gap:8px; }
+  .stat-row .v{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:15px; color:var(--dark); }
+  .swatch{ width:10px; height:10px; border-radius:3px; }
+
+  /* alert card */
+  .alert-card{ background:#FEF2F2; border:1.5px solid #FECACA; border-radius:16px; padding:20px; display:flex; gap:16px; align-items:center; }
+  .alert-card .anum{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:30px; color:#991B1B; }
+  .alert-card .atxt{ font-size:13px; color:#991B1B; }
+  .alert-card .aicon{ font-size:26px; }
+
+  footer{ text-align:center; margin-top:36px; font-size:11.5px; color:#94a3b8; }
+
+  @media (max-width:900px){
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+    .grid-2, .grid-3{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="chip"><img src="CONFRA2026%20LOGO.png" alt="CONFRA2026" onerror="this.style.display='none'"></div>
+      <div>
+        <h1>Painel Executivo — CONFRA2026</h1>
+        <div class="sub">Acompanhamento de inscrições, ônibus e arrecadação</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div class="deadlines" id="deadlines"></div>
+      <div class="updated" id="updatedBadge">Atualizado em --/--/----</div>
+    </div>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="section-title"><span class="dot" style="background:var(--orange)"></span><h2>Financeiro</h2></div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Arrecadação total <span class="tag">confirmado vs meta</span></h3>
+      <div class="goal-row">
+        <span class="big" id="goalValue">R$ 0</span>
+        <span class="of" id="goalOf">de R$ 0</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="goalBar" style="width:0%"></div>
+      </div>
+      <div class="legend-row">
+        <span><span class="legend-dot" style="background:var(--orange)"></span>Confirmado</span>
+        <span><span class="legend-dot" style="background:#f1f5f9; border:1px solid #e2e8f0;"></span>Restante até a meta</span>
+      </div>
+
+      <h3 style="margin-top:28px;">Arrecadação por mês <span class="tag">confirmado x pendente</span></h3>
+      <div class="month-chart" id="monthChart"></div>
+      <div class="legend-row">
+        <span><span class="legend-dot" style="background:var(--teal)"></span>Confirmado</span>
+        <span><span class="legend-dot" style="background:#FDE68A"></span>Pendente do mês</span>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div class="alert-card">
+        <div class="aicon">⚠️</div>
+        <div>
+          <div class="anum" id="atrasadasQtd">0</div>
+          <div class="atxt">parcelas de meses anteriores ainda pendentes<br><span id="atrasadasValor" style="font-weight:700;"></span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Cobertura de apoio nominal</h3>
+        <div class="stat-list">
+          <div class="stat-row"><span class="k"><span class="swatch" style="background:var(--teal)"></span>Famílias cobertas por apoio</span><span class="v" id="apoioCobertas">0</span></div>
+          <div class="stat-row"><span class="k"><span class="swatch" style="background:var(--orange)"></span>Sem cobertura, abaixo do mínimo</span><span class="v" id="apoioSemCobertura">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="dot" style="background:var(--teal)"></span><h2>Inscrições</h2></div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Composição das inscrições <span class="tag">por faixa etária</span></h3>
+      <div class="stat-list" id="composicaoList"></div>
+    </div>
+    <div class="card">
+      <h3>Famílias</h3>
+      <div class="stat-list">
+        <div class="stat-row"><span class="k">Famílias inscritas</span><span class="v" id="familiasQtd">0</span></div>
+        <div class="stat-row"><span class="k">Média de pessoas por família</span><span class="v" id="mediaPessoas">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="dot" style="background:var(--dark)"></span><h2>Logística do ônibus</h2></div>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Ocupação do ônibus <span class="tag" id="onibusCapTag"></span></h3>
+      <div class="gauge-wrap">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#f1f5f9" stroke-width="14"/>
+          <circle id="gaugeCircle" cx="60" cy="60" r="50" fill="none" stroke="var(--teal)" stroke-width="14"
+                  stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314"
+                  transform="rotate(-90 60 60)"/>
+          <text x="60" y="66" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="22" fill="#1E293B" id="gaugePct">0%</text>
+        </svg>
+        <div class="gauge-num">
+          <span class="v" id="onibusConfirmados">0</span>
+          <span class="l">assentos ocupados de <span id="onibusCapacidade">0</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Meio de transporte</h3>
+      <div class="stat-list">
+        <div class="stat-row"><span class="k"><span class="swatch" style="background:var(--teal)"></span>Vão de ônibus fretado</span><span class="v" id="transOnibus">0</span></div>
+        <div class="stat-row"><span class="k"><span class="swatch" style="background:#94a3b8"></span>Vão por conta própria</span><span class="v" id="transProprio">0</span></div>
+        <div class="stat-row"><span class="k"><span class="swatch" style="background:#e2e8f0"></span>Vagas livres no ônibus</span><span class="v" id="onibusLivres">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Números agregados apenas — dados individuais (nomes, contatos) permanecem exclusivamente na planilha administrativa.
+  </footer>
+</div>
+
+<script>
+async function loadData(){
+  try{
+    const res = await fetch('dashboard-data.json', {cache:'no-store'});
+    if(!res.ok) throw new Error('not ok');
+    return await res.json();
+  }catch(e){
+    // Dados de exemplo — usados caso o arquivo dashboard-data.json não seja encontrado
+    return {
+      atualizado_em: "2026-08-27",
+      prazos: { inscricao: "2026-11-21", evento: "2026-11-28" },
+      pessoas: { total_inscritos: 62, familias: 19, criancas_gratis: 8, meia_contribuicao: 10, contribuicao_inteira: 44 },
+      onibus: { capacidade: 45, confirmados: 38, carro_proprio: 6 },
+      financeiro: {
+        meta: 11500, confirmado_total: 3680, a_confirmar_total: 1450,
+        por_mes: [
+          {mes:"Ago",confirmado:1200,pendente:150},{mes:"Set",confirmado:900,pendente:300},
+          {mes:"Out",confirmado:780,pendente:400},{mes:"Nov",confirmado:500,pendente:350},
+          {mes:"Dez",confirmado:300,pendente:250}
+        ],
+        parcelas_atrasadas_qtd: 5, parcelas_atrasadas_valor: 620
+      },
+      apoio_nominal: { familias_cobertas: 7, sem_cobertura_abaixo_minimo: 3 }
+    };
+  }
+}
+
+function fmtBRL(v){
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+function daysUntil(dateStr){
+  const target = new Date(dateStr + 'T00:00:00');
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  return Math.ceil((target - now) / (1000*60*60*24));
+}
+function fmtDateBR(dateStr){
+  const [y,m,d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+loadData().then(data => {
+  // updated badge
+  const [uy,um,ud] = data.atualizado_em.split('-');
+  document.getElementById('updatedBadge').textContent = `Atualizado em ${ud}/${um}/${uy}`;
+
+  // deadlines
+  const diasInsc = daysUntil(data.prazos.inscricao);
+  const diasEvt = daysUntil(data.prazos.evento);
+  document.getElementById('deadlines').innerHTML = `
+    <div class="dl-pill ${diasInsc<=14?'warn':''}"><span class="n">${diasInsc}</span> dias p/ encerrar inscrições (${fmtDateBR(data.prazos.inscricao)})</div>
+    <div class="dl-pill"><span class="n">${diasEvt}</span> dias p/ o evento (${fmtDateBR(data.prazos.evento)})</div>
+  `;
+
+  // KPI row
+  const pctMeta = Math.min(100, Math.round((data.financeiro.confirmado_total / data.financeiro.meta) * 100));
+  const pctOnibus = Math.round((data.onibus.confirmados / data.onibus.capacidade) * 100);
+  const kpis = [
+    { label:'Total de inscritos', value: data.pessoas.total_inscritos, foot: `${data.pessoas.familias} famílias`, color:'var(--teal)' },
+    { label:'Arrecadado', value: fmtBRL(data.financeiro.confirmado_total), foot: `${pctMeta}% da meta de ${fmtBRL(data.financeiro.meta)}`, color:'var(--orange)' },
+    { label:'Ocupação do ônibus', value: `${pctOnibus}%`, foot: `${data.onibus.confirmados} de ${data.onibus.capacidade} assentos`, color:'var(--dark)' },
+    { label:'Parcelas atrasadas', value: data.financeiro.parcelas_atrasadas_qtd, foot: `${fmtBRL(data.financeiro.parcelas_atrasadas_valor)} em atraso`, color:'#DC2626' },
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="accent" style="background:${k.color}"></div>
+      <div class="label">${k.label}</div>
+      <div class="value">${k.value}</div>
+      <div class="foot">${k.foot}</div>
+    </div>
+  `).join('');
+
+  // Financeiro - goal bar
+  document.getElementById('goalValue').textContent = fmtBRL(data.financeiro.confirmado_total);
+  document.getElementById('goalOf').textContent = `de ${fmtBRL(data.financeiro.meta)} (${pctMeta}%)`;
+  document.getElementById('goalBar').style.width = pctMeta + '%';
+
+  // Monthly chart
+  const maxMonth = Math.max(...data.financeiro.por_mes.map(m => m.confirmado + m.pendente));
+  document.getElementById('monthChart').innerHTML = data.financeiro.por_mes.map(m => {
+    const total = m.confirmado + m.pendente;
+    const hTotal = Math.max(4, (total / maxMonth) * 120);
+    const hConf = total > 0 ? (m.confirmado/total) * hTotal : 0;
+    const hPend = total > 0 ? (m.pendente/total) * hTotal : 0;
+    return `
+      <div class="month-col">
+        <div class="month-bars" style="height:${hTotal}px;">
+          <div class="mb-seg pending" style="height:${hPend}px;"></div>
+          <div class="mb-seg confirmed" style="height:${hConf}px;"></div>
+        </div>
+        <div class="month-label">${m.mes}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Alert card
+  document.getElementById('atrasadasQtd').textContent = data.financeiro.parcelas_atrasadas_qtd;
+  document.getElementById('atrasadasValor').textContent = fmtBRL(data.financeiro.parcelas_atrasadas_valor) + ' represados de meses anteriores';
+
+  // Apoio nominal
+  document.getElementById('apoioCobertas').textContent = data.apoio_nominal.familias_cobertas;
+  document.getElementById('apoioSemCobertura').textContent = data.apoio_nominal.sem_cobertura_abaixo_minimo;
+
+  // Composicao
+  const p = data.pessoas;
+  const compRows = [
+    { label:'Contribuição inteira (13+)', value:p.contribuicao_inteira, color:'var(--orange)' },
+    { label:'Meia contribuição (7-12)', value:p.meia_contribuicao, color:'var(--teal)' },
+    { label:'Gratuito (0-6)', value:p.criancas_gratis, color:'#94a3b8' },
+  ];
+  document.getElementById('composicaoList').innerHTML = compRows.map(r => `
+    <div class="stat-row"><span class="k"><span class="swatch" style="background:${r.color}"></span>${r.label}</span><span class="v">${r.value}</span></div>
+  `).join('');
+
+  // Familias
+  document.getElementById('familiasQtd').textContent = p.familias;
+  document.getElementById('mediaPessoas').textContent = (p.total_inscritos / p.familias).toFixed(1);
+
+  // Onibus gauge
+  const circumference = 314;
+  const offset = circumference - (pctOnibus/100)*circumference;
+  document.getElementById('gaugeCircle').style.strokeDashoffset = offset;
+  document.getElementById('gaugePct').textContent = pctOnibus + '%';
+  document.getElementById('onibusConfirmados').textContent = data.onibus.confirmados;
+  document.getElementById('onibusCapacidade').textContent = data.onibus.capacidade;
+  document.getElementById('onibusCapTag').textContent = `${data.onibus.capacidade} assentos`;
+  document.getElementById('transOnibus').textContent = data.onibus.confirmados;
+  document.getElementById('transProprio').textContent = data.onibus.carro_proprio;
+  document.getElementById('onibusLivres').textContent = Math.max(0, data.onibus.capacidade - data.onibus.confirmados);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "atualizado_em": "2026-08-27",
+  "prazos": {
+    "inscricao": "2026-11-21",
+    "evento": "2026-11-28"
+  },
+  "pessoas": {
+    "total_inscritos": 62,
+    "familias": 19,
+    "criancas_gratis": 8,
+    "meia_contribuicao": 10,
+    "contribuicao_inteira": 44
+  },
+  "onibus": {
+    "capacidade": 45,
+    "confirmados": 38,
+    "carro_proprio": 6
+  },
+  "financeiro": {
+    "meta": 11500,
+    "confirmado_total": 3680,
+    "a_confirmar_total": 1450,
+    "por_mes": [
+      {"mes": "Ago", "confirmado": 1200, "pendente": 150},
+      {"mes": "Set", "confirmado": 900, "pendente": 300},
+      {"mes": "Out", "confirmado": 780, "pendente": 400},
+      {"mes": "Nov", "confirmado": 500, "pendente": 350},
+      {"mes": "Dez", "confirmado": 300, "pendente": 250}
+    ],
+    "parcelas_atrasadas_qtd": 5,
+    "parcelas_atrasadas_valor": 620
+  },
+  "apoio_nominal": {
+    "familias_cobertas": 7,
+    "sem_cobertura_abaixo_minimo": 3
+  }
+}
