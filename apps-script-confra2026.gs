@@ -350,11 +350,129 @@ function enviarEmailConfirmacao(nome, email, totalPlanejado, vaiOnibus, parcelas
   }
 }
 
+/**
+ * SUBSTITUA a função doGet(e) existente por esta versão abaixo, e adicione a nova
+ * função gerarAgregadosDashboard() em algum lugar do mesmo arquivo (não precisa
+ * mexer em mais nada — doPost, buscarPorTelefone, envio de e-mail, etc. continuam
+ * exatamente iguais).
+ *
+ * O que muda: o doGet passa a reconhecer um terceiro caso, "?dashboard=1", além dos
+ * dois que já existiam (busca por telefone e a resposta padrão "O script está no ar").
+ *
+ * URL a colocar no dashboard.html: a MESMA URL que a landing page já usa
+ * (APPS_SCRIPT_URL) + "?dashboard=1" no final.
+ */
+
+const META_FINANCEIRA = 11500;
+const CAPACIDADE_ONIBUS = 45;
+const ANO_EVENTO = 2026;
+const MES_NUMERO = { Ago: 8, Set: 9, Out: 10, Nov: 11, Dez: 12 };
+
 function doGet(e) {
   if (e.parameter.telefone) {
     return buscarPorTelefone(e);
   }
+  if (e.parameter.dashboard) {
+    return gerarAgregadosDashboard();
+  }
   return ContentService.createTextOutput('O script está no ar. Use POST para enviar dados.');
+}
+
+function gerarAgregadosDashboard() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var linhas = sheet.getDataRange().getValues();
+
+  var totalPessoas = 0, familias = 0;
+  var criancasGratis = 0, meia = 0, inteira = 0;
+  var onibusConfirmados = 0, carroProprio = 0;
+  var confirmadoTotal = 0, aConfirmarTotal = 0;
+  var parcelasAtrasadasQtd = 0, parcelasAtrasadasValor = 0;
+
+  var porMes = {};
+  for (var m in MESES_COLS) porMes[m] = { mes: m, confirmado: 0, pendente: 0 };
+
+  var now = new Date();
+  var mesAtual = now.getMonth() + 1;
+  var anoAtual = now.getFullYear();
+
+  for (var i = 1; i < linhas.length; i++) {
+    var linha = linhas[i];
+    if (!linha[1]) continue; // sem Nome Responsavel, pula linha vazia
+    familias++;
+
+    var familiares = [];
+    try { familiares = JSON.parse(linha[6] || '[]'); } catch (err) { familiares = []; }
+
+    totalPessoas += 1 + familiares.length;
+    inteira += 1; // responsável = adulto
+
+    familiares.forEach(function (f) {
+      var v = String(f.faixaValor);
+      if (v === '0') criancasGratis++;
+      else if (v === '72') meia++;
+      else inteira++;
+    });
+
+    var vaiDeOnibus = String(linha[17] || '').trim().toLowerCase() === 'sim';
+    var pessoasFamilia = 1 + familiares.length;
+    if (vaiDeOnibus) onibusConfirmados += pessoasFamilia;
+    else carroProprio += pessoasFamilia;
+
+    for (var mes in MESES_COLS) {
+      var col = MESES_COLS[mes];
+      var valor = Number(linha[col.valor - 1]) || 0;
+      var confirmado = estaConfirmado(linha[col.confirmado - 1]);
+
+      if (valor > 0) {
+        if (confirmado) {
+          porMes[mes].confirmado += valor;
+          confirmadoTotal += valor;
+        } else {
+          porMes[mes].pendente += valor;
+          aConfirmarTotal += valor;
+          var mesNum = MES_NUMERO[mes];
+          var jaPassouOuEhAtual = anoAtual > ANO_EVENTO || (anoAtual === ANO_EVENTO && mesNum <= mesAtual);
+          if (jaPassouOuEhAtual) {
+            parcelasAtrasadasQtd++;
+            parcelasAtrasadasValor += valor;
+          }
+        }
+      }
+    }
+  }
+
+  var resultado = {
+    atualizado_em: Utilities.formatDate(now, 'America/Sao_Paulo', 'yyyy-MM-dd'),
+    prazos: { inscricao: '2026-11-21', evento: '2026-11-28' },
+    pessoas: {
+      total_inscritos: totalPessoas,
+      familias: familias,
+      criancas_gratis: criancasGratis,
+      meia_contribuicao: meia,
+      contribuicao_inteira: inteira
+    },
+    onibus: {
+      capacidade: CAPACIDADE_ONIBUS,
+      confirmados: onibusConfirmados,
+      carro_proprio: carroProprio
+    },
+    financeiro: {
+      meta: META_FINANCEIRA,
+      confirmado_total: confirmadoTotal,
+      a_confirmar_total: aConfirmarTotal,
+      por_mes: Object.keys(porMes).map(function (k) { return porMes[k]; }),
+      parcelas_atrasadas_qtd: parcelasAtrasadasQtd,
+      parcelas_atrasadas_valor: parcelasAtrasadasValor
+    },
+    apoio_nominal: {
+      familias_cobertas: 0,
+      sem_cobertura_abaixo_minimo: 0,
+      obs: 'campo ainda nao capturado no formulario'
+    }
+  };
+
+  return ContentService.createTextOutput(JSON.stringify(resultado))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function buscarPorTelefone(e) {
