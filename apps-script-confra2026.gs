@@ -492,8 +492,16 @@ function verificarConclusaoEEnviarEmail(sheet, row) {
     var nome = linha[1];
     var email = linha[18];
     var total = linha[5];
-    enviarEmailConclusao(nome, email, total);
-    sheet.getRange(row, COL_EMAIL_CONCLUSAO_ENVIADO).setValue(new Date());
+    var enviouComSucesso = enviarEmailConclusao(nome, email, total);
+    if (enviouComSucesso) {
+      sheet.getRange(row, COL_EMAIL_CONCLUSAO_ENVIADO).setValue(new Date());
+    } else {
+      // Não marca a coluna V: assim, na próxima edição relevante dessa linha
+      // (ex: a Secretaria mexer em qualquer célula monitorada), o script tenta
+      // enviar de novo automaticamente, em vez de ficar "travado" achando que
+      // já enviou quando na verdade falhou (email vazio ou erro no envio).
+      Logger.log('Email de conclusão NÃO enviado para a linha ' + row + ' (email vazio ou falha no envio) — coluna V deixada em branco de propósito.');
+    }
   }
 }
 
@@ -548,8 +556,16 @@ var TEMPLATE_EMAIL_CONCLUSAO = `
 </html>
 `;
 
+/**
+ * Retorna true se o email foi de fato disparado com sucesso, false caso contrário
+ * (email vazio na planilha, ou qualquer erro no envio). O chamador usa esse retorno
+ * pra decidir se marca a coluna V — nunca marca "enviado" sem confirmação real.
+ */
 function enviarEmailConclusao(nome, email, totalPlanejado) {
-  if (!email) return;
+  if (!email) {
+    Logger.log('Email de conclusão não enviado: coluna Email está vazia para "' + nome + '".');
+    return false;
+  }
 
   var primeiroNome = (nome || '').trim().split(' ')[0] || '';
   var totalFormatado = Number(totalPlanejado || 0).toFixed(2).replace('.', ',');
@@ -565,8 +581,10 @@ function enviarEmailConclusao(nome, email, totalPlanejado) {
       htmlBody: html
     });
     Logger.log('E-mail de conclusão enviado com sucesso para: ' + email);
+    return true;
   } catch (err) {
     Logger.log('FALHA ao enviar e-mail de conclusão para ' + email + ': ' + err.message);
+    return false;
   }
 }
 
