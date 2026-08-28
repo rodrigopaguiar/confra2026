@@ -76,6 +76,11 @@
  *
  * COMPORTAMENTO: se o telefone já existir numa linha, essa linha é ATUALIZADA em vez de criar
  * uma nova. Meses já confirmados na planilha são preservados e ignoram o que vier do formulário.
+ *
+ * LISTA PARA O ÔNIBUS: na própria planilha, use o menu "CONFRA2026 > Gerar lista para o
+ * ônibus (WhatsApp)" (aparece sozinho ao abrir a planilha — recarregue a aba se não aparecer
+ * logo após colar este código pela primeira vez). Gera a lista de todo mundo que marcou
+ * "Vai de Onibus = Sim", já formatada pra colar direto numa conversa do WhatsApp.
  */
 
 var MESES_COLS = {
@@ -93,6 +98,108 @@ var BASE_CENTAVOS_PIX = 26; // Ano da campanha (2026) - usado tambem no index.ht
 
 function estaConfirmado(valorCelula) {
   return valorCelula !== '' && valorCelula !== null && valorCelula !== undefined;
+}
+
+/**
+ * MENU PERSONALIZADO NA PLANILHA — "CONFRA2026 > Gerar lista para o ônibus (WhatsApp)".
+ * Aparece sozinho quando a planilha é aberta (pode ser preciso recarregar a aba depois
+ * de colar este código pela primeira vez). Gera uma lista de todos os inscritos que
+ * marcaram "Vai de Onibus" = Sim — um por linha, responsável e cada dependente — com
+ * nome, documento e, só para dependentes, o nome do responsável. Termina com o total
+ * de assentos necessários. Sai em texto monoespaçado (envolto em ``` ```), formato que
+ * o WhatsApp reconhece e exibe com fonte de largura fixa, preservando o alinhamento
+ * das colunas ao colar direto numa conversa.
+ */
+function onOpen(e) {
+  SpreadsheetApp.getUi()
+    .createMenu('CONFRA2026')
+    .addItem('Gerar lista para o ônibus (WhatsApp)', 'mostrarListaOnibus')
+    .addToUi();
+}
+
+function montarListaOnibus() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var linhas = sheet.getDataRange().getValues();
+  var pessoas = []; // { nome, documento, responsavel }
+
+  for (var i = 1; i < linhas.length; i++) {
+    var linha = linhas[i];
+    if (!linha[1]) continue; // linha vazia, sem Nome Responsavel
+
+    var vaiDeOnibus = String(linha[17] || '').trim().toLowerCase() === 'sim';
+    if (!vaiDeOnibus) continue;
+
+    pessoas.push({ nome: String(linha[1] || ''), documento: String(linha[2] || '—'), responsavel: '' });
+
+    var familiares = [];
+    try { familiares = JSON.parse(linha[6] || '[]'); } catch (err) { familiares = []; }
+
+    familiares.forEach(function (f) {
+      pessoas.push({
+        nome: String((f && f.nome) || ''),
+        documento: String((f && f.rg) || '—'),
+        responsavel: String(linha[1] || '')
+      });
+    });
+  }
+
+  return pessoas;
+}
+
+function formatarListaOnibusParaWhatsapp(pessoas) {
+  var tituloNome = 'NOME';
+  var tituloDoc = 'DOCUMENTO';
+  var tituloResp = 'RESPONSÁVEL (se dependente)';
+
+  var larguraNome = tituloNome.length;
+  var larguraDoc = tituloDoc.length;
+  pessoas.forEach(function (p) {
+    if (p.nome.length > larguraNome) larguraNome = p.nome.length;
+    if (p.documento.length > larguraDoc) larguraDoc = p.documento.length;
+  });
+
+  function pad(str, largura) {
+    str = String(str);
+    while (str.length < largura) str += ' ';
+    return str;
+  }
+
+  var linhasTexto = [];
+  linhasTexto.push(pad(tituloNome, larguraNome) + '  ' + pad(tituloDoc, larguraDoc) + '  ' + tituloResp);
+  linhasTexto.push(pad('', larguraNome).replace(/ /g, '-') + '  ' + pad('', larguraDoc).replace(/ /g, '-') + '  ' + '---------------------------');
+
+  pessoas.forEach(function (p) {
+    linhasTexto.push(pad(p.nome, larguraNome) + '  ' + pad(p.documento, larguraDoc) + '  ' + p.responsavel);
+  });
+
+  var texto = '```\n' + linhasTexto.join('\n') + '\n```';
+  texto += '\n\n*Total de assentos necessários: ' + pessoas.length + '*';
+  return texto;
+}
+
+function mostrarListaOnibus() {
+  var pessoas = montarListaOnibus();
+
+  if (pessoas.length === 0) {
+    SpreadsheetApp.getUi().alert('Nenhum inscrito marcou "Vai de Ônibus = Sim" até agora.');
+    return;
+  }
+
+  var texto = formatarListaOnibusParaWhatsapp(pessoas);
+  var textoEscapadoParaHtml = texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  var html =
+    '<textarea id="txt" style="width:100%; height:360px; font-family:monospace; font-size:12px; box-sizing:border-box;" readonly>' +
+    textoEscapadoParaHtml +
+    '</textarea>' +
+    '<div style="margin-top:10px; font-family:Arial, sans-serif;">' +
+    '<button onclick="document.getElementById(\'txt\').select(); document.execCommand(\'copy\');" style="padding:8px 16px; font-weight:bold;">Copiar tudo</button>' +
+    '<p style="font-size:12px; color:#666; margin-top:10px;">Se o botão não copiar automaticamente (alguns navegadores bloqueiam), clique dentro do texto, aperte Ctrl+A (ou Cmd+A no Mac) e depois Ctrl+C (ou Cmd+C) para copiar manualmente.<br>' +
+    'Cole direto numa conversa do WhatsApp — os três crases (```) no início e no fim fazem o WhatsApp exibir em fonte de largura fixa, mantendo as colunas alinhadas.</p>' +
+    '</div>';
+
+  var output = HtmlService.createHtmlOutput(html).setWidth(700).setHeight(500);
+  SpreadsheetApp.getUi().showModalDialog(output, 'Lista para o Ônibus — ' + pessoas.length + ' assento(s)');
 }
 
 /**
