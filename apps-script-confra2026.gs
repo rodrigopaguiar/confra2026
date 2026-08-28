@@ -19,7 +19,13 @@
  *    T: Indice Centavo (NAO PREENCHER MANUALMENTE - atribuido automaticamente pelo script,
  *       usado para identificar quem pagou no extrato do Pix: o valor final cobrado da pessoa
  *       é o valor da parcela + R$0,26 + esse indice em centavos, ex: indice 0 = ,26; indice 1 = ,27)
- *    U: Email Conclusao Enviado (NAO PREENCHER MANUALMENTE - marcado com a data/hora quando
+ *    U: Quitação Confirmada (PREENCHIMENTO MANUAL E DELIBERADO PELA SECRETARIA — só escreva
+ *       algo aqui, tipo "OK" ou a data, depois de conferir a linha inteira e decidir que
+ *       aquela família realmente concluiu as parcelas. Esse campo existe separado dos
+ *       "Confirmado <Mês>" de propósito: evita que um clique errado num mês dispare
+ *       sozinho o email de conclusão — só dispara quando ISSO aqui E todos os meses
+ *       batem ao mesmo tempo.)
+ *    V: Email Conclusao Enviado (NAO PREENCHER MANUALMENTE - marcado com a data/hora quando
  *       o email de "contribuição concluída" já foi disparado para essa família, pra nunca
  *       reenviar duas vezes)
  *
@@ -33,11 +39,14 @@
  * cadastro (nunca muda em edicoes futuras), garantindo que o mesmo valor sempre identifique
  * a mesma familia ao longo de toda a campanha.
  *
- * EMAIL DE CONCLUSAO DAS CONTRIBUICOES: quando a Secretaria marca a ULTIMA parcela pendente
- * de uma familia como confirmada (ou seja, todos os meses com valor > 0 ja estao confirmados),
- * o script dispara automaticamente um email parabenizando pela conclusao. Isso funciona via
- * um gatilho de EDICAO NA PLANILHA (nao no formulario), entao exige UM PASSO DE CONFIGURACAO
- * MANUAL, UMA UNICA VEZ (o Apps Script nao pode se autoconceder essa permissao sozinho):
+ * EMAIL DE CONCLUSAO DAS CONTRIBUICOES: dispara quando DUAS coisas sao verdade ao mesmo
+ * tempo — (1) a Secretaria escreveu algo na coluna U ("Quitação Confirmada"), de forma
+ * deliberada, depois de revisar a linha, e (2) o script confere sozinho que todos os meses
+ * com valor > 0 ja estao de fato marcados como confirmados. Essa dupla checagem existe pra
+ * que um erro de digitação num unico mês nao dispare o email sozinho — precisa das duas
+ * confirmações batendo juntas. Isso funciona via um gatilho de EDICAO NA PLANILHA (nao no
+ * formulario), entao exige UM PASSO DE CONFIGURACAO MANUAL, UMA UNICA VEZ (o Apps Script
+ * nao pode se autoconceder essa permissao sozinho):
  *   a) No editor do Apps Script, no menu lateral esquerdo, clique no icone de relogio
  *      ("Acionadores" / "Triggers").
  *   b) Clique em "+ Adicionar acionador" (canto inferior direito).
@@ -78,7 +87,8 @@ var MESES_COLS = {
 };
 
 var COL_INDICE_CENTAVO = 20; // Coluna T
-var COL_EMAIL_CONCLUSAO_ENVIADO = 21; // Coluna U
+var COL_QUITACAO_CONFIRMADA = 21; // Coluna U (manual, preenchida pela Secretaria)
+var COL_EMAIL_CONCLUSAO_ENVIADO = 22; // Coluna V (automatica)
 var BASE_CENTAVOS_PIX = 26; // Ano da campanha (2026) - usado tambem no index.html
 
 function estaConfirmado(valorCelula) {
@@ -417,20 +427,23 @@ function enviarEmailConfirmacao(nome, email, totalPlanejado, vaiOnibus, parcelas
 
 /**
  * GATILHO DE EDICAO NA PLANILHA — precisa ser configurado manualmente como acionador
- * instalável (veja instruções no topo do arquivo). Ao editar/colar em qualquer célula,
- * verifica se a coluna afetada é uma das colunas "Confirmado <Mês>"; se for, checa cada
- * linha tocada para ver se a família concluiu todas as parcelas comprometidas.
+ * instalável (veja instruções no topo do arquivo). Monitora tanto as colunas "Confirmado
+ * <Mês>" quanto a coluna U ("Quitação Confirmada"), já que o email só deve sair quando as
+ * duas condições baterem juntas — a edição que completa essa condição pode vir de qualquer
+ * uma das duas frentes.
  */
 function aoEditarPlanilha(e) {
   try {
     if (!e || !e.range) return;
     var sheet = e.range.getSheet();
 
-    var colunasConfirmado = Object.keys(MESES_COLS).map(function (m) { return MESES_COLS[m].confirmado; });
+    var colunasMonitoradas = Object.keys(MESES_COLS).map(function (m) { return MESES_COLS[m].confirmado; });
+    colunasMonitoradas.push(COL_QUITACAO_CONFIRMADA);
+
     var colInicio = e.range.getColumn();
     var colFim = colInicio + e.range.getNumColumns() - 1;
-    var tocouColunaConfirmado = colunasConfirmado.some(function (c) { return c >= colInicio && c <= colFim; });
-    if (!tocouColunaConfirmado) return;
+    var tocouColunaRelevante = colunasMonitoradas.some(function (c) { return c >= colInicio && c <= colFim; });
+    if (!tocouColunaRelevante) return;
 
     var linhaInicio = Math.max(e.range.getRow(), 2); // pula o cabeçalho
     var linhaFim = e.range.getRow() + e.range.getNumRows() - 1;
@@ -444,13 +457,19 @@ function aoEditarPlanilha(e) {
 }
 
 /**
- * Confere se TODAS as parcelas com valor > 0 de uma linha estão confirmadas e, se sim
- * e o email de conclusão ainda não foi enviado para ela, dispara o email e marca a
- * coluna U com a data/hora do envio (para nunca reenviar duas vezes).
+ * Só envia o email de conclusão quando DUAS condições baterem ao mesmo tempo:
+ * (1) a Secretaria já escreveu algo na coluna U (Quitação Confirmada) — confirmação
+ *     deliberada, feita depois de revisar a linha inteira — e
+ * (2) todas as parcelas com valor > 0 da linha estão de fato marcadas como confirmadas.
+ * Se sim, e o email ainda não foi enviado para essa família, dispara o email e marca
+ * a coluna V com a data/hora do envio (para nunca reenviar duas vezes).
  */
 function verificarConclusaoEEnviarEmail(sheet, row) {
   var jaEnviado = sheet.getRange(row, COL_EMAIL_CONCLUSAO_ENVIADO).getValue();
   if (jaEnviado) return;
+
+  var quitacaoConfirmadaPelaSecretaria = sheet.getRange(row, COL_QUITACAO_CONFIRMADA).getValue();
+  if (!estaConfirmado(quitacaoConfirmadaPelaSecretaria)) return; // ainda nao foi revisada/confirmada manualmente
 
   var ultimaColuna = Math.max(COL_EMAIL_CONCLUSAO_ENVIADO, sheet.getLastColumn());
   var linha = sheet.getRange(row, 1, 1, ultimaColuna).getValues()[0];
