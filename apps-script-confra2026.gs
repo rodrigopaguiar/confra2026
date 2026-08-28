@@ -19,6 +19,9 @@
  *    T: Indice Centavo (NAO PREENCHER MANUALMENTE - atribuido automaticamente pelo script,
  *       usado para identificar quem pagou no extrato do Pix: o valor final cobrado da pessoa
  *       é o valor da parcela + R$0,26 + esse indice em centavos, ex: indice 0 = ,26; indice 1 = ,27)
+ *    U: Email Conclusao Enviado (NAO PREENCHER MANUALMENTE - marcado com a data/hora quando
+ *       o email de "contribuição concluída" já foi disparado para essa família, pra nunca
+ *       reenviar duas vezes)
  *
  * IDENTIFICACAO DO PIX POR CENTAVO: cada cadastro NOVO recebe um indice sequencial unico
  * (0, 1, 2...) na coluna T, atribuido de forma segura mesmo se dois cadastros chegarem ao
@@ -29,6 +32,19 @@
  * especifica, sem depender so do nome do remetente. O indice e atribuido UMA UNICA VEZ por
  * cadastro (nunca muda em edicoes futuras), garantindo que o mesmo valor sempre identifique
  * a mesma familia ao longo de toda a campanha.
+ *
+ * EMAIL DE CONCLUSAO DAS CONTRIBUICOES: quando a Secretaria marca a ULTIMA parcela pendente
+ * de uma familia como confirmada (ou seja, todos os meses com valor > 0 ja estao confirmados),
+ * o script dispara automaticamente um email parabenizando pela conclusao. Isso funciona via
+ * um gatilho de EDICAO NA PLANILHA (nao no formulario), entao exige UM PASSO DE CONFIGURACAO
+ * MANUAL, UMA UNICA VEZ (o Apps Script nao pode se autoconceder essa permissao sozinho):
+ *   a) No editor do Apps Script, no menu lateral esquerdo, clique no icone de relogio
+ *      ("Acionadores" / "Triggers").
+ *   b) Clique em "+ Adicionar acionador" (canto inferior direito).
+ *   c) Configure: Função a ser executada = aoEditarPlanilha | Evento = Do tipo de planilha
+ *      | Tipo de evento = Ao editar. Salve e autorize as permissoes pedidas (sua conta Google).
+ * Sem esse passo, a coluna T e o cadastro continuam funcionando normalmente — só o email de
+ * conclusão não vai disparar.
  *
  * ENVIO AUTOMATICO DE EMAIL: ao confirmar um cadastro NOVO (nao em edicoes), o script envia
  * automaticamente um email de confirmacao em HTML (com o visual da landing page) para o
@@ -62,6 +78,7 @@ var MESES_COLS = {
 };
 
 var COL_INDICE_CENTAVO = 20; // Coluna T
+var COL_EMAIL_CONCLUSAO_ENVIADO = 21; // Coluna U
 var BASE_CENTAVOS_PIX = 26; // Ano da campanha (2026) - usado tambem no index.html
 
 function estaConfirmado(valorCelula) {
@@ -395,6 +412,142 @@ function enviarEmailConfirmacao(nome, email, totalPlanejado, vaiOnibus, parcelas
     // então não interrompemos o fluxo por causa disso — mas registramos o erro para
     // conseguirmos diagnosticar depois, em Execuções.
     Logger.log('FALHA ao enviar e-mail para ' + email + ': ' + err.message);
+  }
+}
+
+/**
+ * GATILHO DE EDICAO NA PLANILHA — precisa ser configurado manualmente como acionador
+ * instalável (veja instruções no topo do arquivo). Ao editar/colar em qualquer célula,
+ * verifica se a coluna afetada é uma das colunas "Confirmado <Mês>"; se for, checa cada
+ * linha tocada para ver se a família concluiu todas as parcelas comprometidas.
+ */
+function aoEditarPlanilha(e) {
+  try {
+    if (!e || !e.range) return;
+    var sheet = e.range.getSheet();
+
+    var colunasConfirmado = Object.keys(MESES_COLS).map(function (m) { return MESES_COLS[m].confirmado; });
+    var colInicio = e.range.getColumn();
+    var colFim = colInicio + e.range.getNumColumns() - 1;
+    var tocouColunaConfirmado = colunasConfirmado.some(function (c) { return c >= colInicio && c <= colFim; });
+    if (!tocouColunaConfirmado) return;
+
+    var linhaInicio = Math.max(e.range.getRow(), 2); // pula o cabeçalho
+    var linhaFim = e.range.getRow() + e.range.getNumRows() - 1;
+
+    for (var row = linhaInicio; row <= linhaFim; row++) {
+      verificarConclusaoEEnviarEmail(sheet, row);
+    }
+  } catch (err) {
+    Logger.log('Erro em aoEditarPlanilha: ' + err.message);
+  }
+}
+
+/**
+ * Confere se TODAS as parcelas com valor > 0 de uma linha estão confirmadas e, se sim
+ * e o email de conclusão ainda não foi enviado para ela, dispara o email e marca a
+ * coluna U com a data/hora do envio (para nunca reenviar duas vezes).
+ */
+function verificarConclusaoEEnviarEmail(sheet, row) {
+  var jaEnviado = sheet.getRange(row, COL_EMAIL_CONCLUSAO_ENVIADO).getValue();
+  if (jaEnviado) return;
+
+  var ultimaColuna = Math.max(COL_EMAIL_CONCLUSAO_ENVIADO, sheet.getLastColumn());
+  var linha = sheet.getRange(row, 1, 1, ultimaColuna).getValues()[0];
+
+  var teveAlgumaParcela = false;
+  var todasConfirmadas = true;
+  for (var mes in MESES_COLS) {
+    var col = MESES_COLS[mes];
+    var valor = Number(linha[col.valor - 1]) || 0;
+    if (valor > 0) {
+      teveAlgumaParcela = true;
+      if (!estaConfirmado(linha[col.confirmado - 1])) {
+        todasConfirmadas = false;
+        break;
+      }
+    }
+  }
+
+  if (teveAlgumaParcela && todasConfirmadas) {
+    var nome = linha[1];
+    var email = linha[18];
+    var total = linha[5];
+    enviarEmailConclusao(nome, email, total);
+    sheet.getRange(row, COL_EMAIL_CONCLUSAO_ENVIADO).setValue(new Date());
+  }
+}
+
+var TEMPLATE_EMAIL_CONCLUSAO = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição concluída — CONFRA2026</title>
+</head>
+<body style="margin:0; padding:0; background-color:#EDE9DD; font-family: Arial, Helvetica, sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#EDE9DD;">
+<tr>
+<td align="center" style="padding: 32px 16px;">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; background-color:#FFFFFF; border-radius:16px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+    <tr>
+      <td align="center" style="background-color:#008E82; padding:34px 24px 30px;">
+        <img src="https://rodrigopaguiar.github.io/confra2026/CONFRA2026%20LOGO.png" width="150" alt="CONFRA2026 - Que dia Feliz!" style="display:block; margin:0 auto;">
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:36px 32px 8px;">
+        <div style="font-size:32px; text-align:center; margin-bottom:14px;">✅</div>
+        <p style="font-size:20px; font-weight:bold; color:#008E82; margin:0 0 14px; text-align:center;">
+          Olá, Irmão(ã) {{PRIMEIRO_NOME}}! Graça e paz!
+        </p>
+        <p style="font-size:15px; line-height:1.7; color:#3F3B33; margin:0 0 14px; text-align:center;">
+          Boa notícia: identificamos que todas as suas parcelas do <strong>CONFRA2026</strong> foram recebidas — sua contribuição de <strong>R$ {{TOTAL_PLANEJADO}}</strong> está completa. Muito obrigado por caminhar junto com a gente até aqui!
+        </p>
+        <p style="font-size:17px; font-weight:bold; color:#D94916; margin:0 0 8px; text-align:center;">
+          Nos vemos em 28/11! #CONFRA2026
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="background-color:#008E82; padding:28px 32px 32px;">
+        <img src="https://rodrigopaguiar.github.io/confra2026/fotos/ibfo-logo-branco.png" width="70" alt="IBFO" style="display:block; margin:0 auto 12px;">
+        <p style="font-size:14px; font-weight:bold; color:#FFFFFF; margin:0 0 4px;">
+          Igreja Batista da Família em Osasco
+        </p>
+        <p style="font-size:11px; color:#CFEEEA; margin:0;">
+          Av. Sete de Setembro, 763 - Cipava - Osasco - SP
+        </p>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+</table>
+</body>
+</html>
+`;
+
+function enviarEmailConclusao(nome, email, totalPlanejado) {
+  if (!email) return;
+
+  var primeiroNome = (nome || '').trim().split(' ')[0] || '';
+  var totalFormatado = Number(totalPlanejado || 0).toFixed(2).replace('.', ',');
+
+  var html = TEMPLATE_EMAIL_CONCLUSAO;
+  html = substituirTodas(html, '{{PRIMEIRO_NOME}}', primeiroNome);
+  html = substituirTodas(html, '{{TOTAL_PLANEJADO}}', totalFormatado);
+
+  try {
+    MailApp.sendEmail({
+      to: email,
+      subject: 'Contribuição concluída — CONFRA2026 🎉',
+      htmlBody: html
+    });
+    Logger.log('E-mail de conclusão enviado com sucesso para: ' + email);
+  } catch (err) {
+    Logger.log('FALHA ao enviar e-mail de conclusão para ' + email + ': ' + err.message);
   }
 }
 
