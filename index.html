@@ -446,6 +446,16 @@
     const PIX_BENEFICIARIO = "IGREJA BATISTA FAMILIA"; // máx. 25 caracteres (sem acentos, cidade já vai à parte)
     const PIX_CIDADE = "OSASCO"; // máx. 15 caracteres
 
+    // Identificação do Pix por centavo: cada família recebe um índice único (vindo do Apps
+    // Script) somado a essa base fixa (26 = ano da campanha). Ex: índice 0 → ,26; índice 1 → ,27.
+    // Isso é o que permite à Tesouraria identificar quem pagou olhando só o valor no extrato.
+    const BASE_CENTAVOS_PIX = 26;
+
+    function valorComCentavoIdentificacao(valorBase, indiceCentavo) {
+      const centavos = BASE_CENTAVOS_PIX + (Number(indiceCentavo) || 0);
+      return Math.floor(Number(valorBase) || 0) + (centavos / 100);
+    }
+
     function crc16Pix(payload) {
       let polinomio = 0x1021;
       let resultado = 0xFFFF;
@@ -491,7 +501,7 @@
       return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
     }
 
-    function renderizarCartoesPix(respNome, respTel, parcelas) {
+    function renderizarCartoesPix(respNome, respTel, parcelas, indiceCentavo) {
       const wrap = document.getElementById('containerPix');
       const container = document.getElementById('cartoesPix');
       container.innerHTML = '';
@@ -502,23 +512,53 @@
 
       parcelas.forEach(p => {
         if (!p.valor || p.valor <= 0) return;
+        const valorFinal = valorComCentavoIdentificacao(p.valor, indiceCentavo);
         const identificador = `${nomeSlug}${telSlug}${p.mes}`.substring(0, 25);
-        const payload = montarPayloadPix({ valor: p.valor, identificador });
+        const payload = montarPayloadPix({ valor: valorFinal, identificador });
 
         const card = document.createElement('div');
         card.className = 'bg-white border-2 border-brand-teal/30 rounded-xl p-4 flex flex-col items-center text-center';
         const qrId = 'qr_' + p.mes + '_' + Math.random().toString(36).slice(2, 7);
         card.innerHTML = `
-          <span class="text-xs font-bold text-brand-orangeDark uppercase mb-2">${p.mes}/26 — R$ ${p.valor.toFixed(2).replace('.', ',')}</span>
+          <span class="text-xs font-bold text-brand-orangeDark uppercase mb-2">${p.mes}/26 — R$ ${valorFinal.toFixed(2).replace('.', ',')}</span>
           <div id="${qrId}" class="my-1"></div>
           <textarea readonly class="w-full text-[10px] font-mono border rounded p-2 my-2 h-16 resize-none">${payload}</textarea>
           <button type="button" class="text-xs font-bold text-brand-teal underline" onclick="navigator.clipboard.writeText(this.previousElementSibling.value)">Copiar código</button>
+          <p class="text-[10px] text-slate-400 mt-2 leading-snug">Pague exatamente esse valor (mesmo com os centavos) — é o que garante que a Tesouraria identifique sua contribuição rapidinho.</p>
         `;
         container.appendChild(card);
         new QRCode(document.getElementById(qrId), { text: payload, width: 130, height: 130 });
       });
 
       wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Depois de gravar o cadastro (POST em modo no-cors, sem resposta legível), buscamos o
+    // índice de identificação já salvo via o mesmo endpoint JSONP usado no preenchimento
+    // automático. Como a gravação é assíncrona, tentamos algumas vezes com pequeno intervalo
+    // antes de desistir e seguir com 0 como fallback (não trava o usuário em nenhum cenário).
+    function obterIndiceCentavoEcontinuar(respTel, callback, tentativa) {
+      tentativa = tentativa || 0;
+      const tel = (respTel || '').replace(/\D/g, '');
+
+      const antigo = document.getElementById('jsonpIndiceCentavo');
+      if (antigo) antigo.remove();
+
+      window.receberIndiceCentavo = function (data) {
+        if (data && data.encontrado && data.indiceCentavo !== null && data.indiceCentavo !== undefined) {
+          callback(Number(data.indiceCentavo) || 0);
+        } else if (tentativa < 5) {
+          setTimeout(() => obterIndiceCentavoEcontinuar(respTel, callback, tentativa + 1), 800);
+        } else {
+          console.warn('Não foi possível confirmar o índice de identificação do Pix a tempo; usando 0 como fallback.');
+          callback(0);
+        }
+      };
+
+      const script = document.createElement('script');
+      script.id = 'jsonpIndiceCentavo';
+      script.src = `${APPS_SCRIPT_URL}?telefone=${tel}&callback=receberIndiceCentavo&cb=${Date.now()}`;
+      document.body.appendChild(script);
     }
 
     // ---------- Busca automática por telefone (identificação sem login) ----------
@@ -795,7 +835,13 @@
           body: JSON.stringify(payloadPlanilha)
         }).catch(() => {});
 
-        renderizarCartoesPix(respNome, respTel, parcelas);
+        // Aguarda um instante pra dar tempo do Apps Script gravar antes de buscar o índice
+        // de identificação — sem isso, a primeira tentativa quase sempre chegaria cedo demais.
+        setTimeout(() => {
+          obterIndiceCentavoEcontinuar(respTel, function (indiceCentavo) {
+            renderizarCartoesPix(respNome, respTel, parcelas, indiceCentavo);
+          });
+        }, 900);
       }
     });
   </script>

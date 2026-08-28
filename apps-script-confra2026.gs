@@ -16,6 +16,19 @@
  *    P: Valor Dez      Q: Confirmado Dez
  *    R: Vai de Onibus (Sim / Nao)
  *    S: Email
+ *    T: Indice Centavo (NAO PREENCHER MANUALMENTE - atribuido automaticamente pelo script,
+ *       usado para identificar quem pagou no extrato do Pix: o valor final cobrado da pessoa
+ *       é o valor da parcela + R$0,26 + esse indice em centavos, ex: indice 0 = ,26; indice 1 = ,27)
+ *
+ * IDENTIFICACAO DO PIX POR CENTAVO: cada cadastro NOVO recebe um indice sequencial unico
+ * (0, 1, 2...) na coluna T, atribuido de forma segura mesmo se dois cadastros chegarem ao
+ * mesmo tempo (via LockService, em obterProximoIndiceCentavo()). Esse indice e somado a uma
+ * base fixa de 26 centavos (BASE_CENTAVOS_PIX, o ano da campanha) para gerar o valor final
+ * que a landing page usa ao montar o QR Code Pix de cada parcela — assim, quando a Tesouraria
+ * olhar o extrato, cada valor "quebrado" (ex: R$ 50,26 / R$ 50,27) aponta para uma familia
+ * especifica, sem depender so do nome do remetente. O indice e atribuido UMA UNICA VEZ por
+ * cadastro (nunca muda em edicoes futuras), garantindo que o mesmo valor sempre identifique
+ * a mesma familia ao longo de toda a campanha.
  *
  * ENVIO AUTOMATICO DE EMAIL: ao confirmar um cadastro NOVO (nao em edicoes), o script envia
  * automaticamente um email de confirmacao em HTML (com o visual da landing page) para o
@@ -48,8 +61,31 @@ var MESES_COLS = {
   Dez: { valor: 16, confirmado: 17 }
 };
 
+var COL_INDICE_CENTAVO = 20; // Coluna T
+var BASE_CENTAVOS_PIX = 26; // Ano da campanha (2026) - usado tambem no index.html
+
 function estaConfirmado(valorCelula) {
   return valorCelula !== '' && valorCelula !== null && valorCelula !== undefined;
+}
+
+/**
+ * Retorna o proximo indice sequencial disponivel (0, 1, 2...) para identificacao via
+ * centavo do Pix, de forma segura contra dois cadastros simultaneos (LockService).
+ * Guardado em PropertiesService (nao numa celula), entao nao depende de nenhuma linha
+ * especifica da planilha e nao corre risco de leitura suja entre execucoes concorrentes.
+ */
+function obterProximoIndiceCentavo() {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000); // espera ate 30s se outro cadastro estiver sendo gravado ao mesmo tempo
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var atual = Number(props.getProperty('ULTIMO_INDICE_CENTAVO') || '-1');
+    var proximo = atual + 1;
+    props.setProperty('ULTIMO_INDICE_CENTAVO', String(proximo));
+    return proximo;
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function doPost(e) {
@@ -68,7 +104,7 @@ function doPost(e) {
     }
   }
 
-  var novaLinha = new Array(19);
+  var novaLinha = new Array(20);
   novaLinha[0] = new Date();
   novaLinha[1] = data.respNome || '';
   novaLinha[2] = data.respRG || '';
@@ -78,6 +114,18 @@ function doPost(e) {
   novaLinha[6] = data.familiares || '[]';
   novaLinha[17] = data.vaiOnibus || 'Sim';
   novaLinha[18] = data.respEmail || '';
+
+  // Indice de identificacao via centavo: atribuido UMA VEZ por cadastro e preservado em
+  // qualquer edicao futura, para o valor continuar apontando pra mesma familia sempre.
+  var indiceCentavo;
+  if (linhaExistente > 0) {
+    var indiceExistente = sheet.getRange(linhaExistente, COL_INDICE_CENTAVO).getValue();
+    var jaTemIndiceValido = indiceExistente !== '' && indiceExistente !== null && !isNaN(Number(indiceExistente));
+    indiceCentavo = jaTemIndiceValido ? Number(indiceExistente) : obterProximoIndiceCentavo();
+  } else {
+    indiceCentavo = obterProximoIndiceCentavo();
+  }
+  novaLinha[COL_INDICE_CENTAVO - 1] = indiceCentavo;
 
   for (var mes in MESES_COLS) {
     var col = MESES_COLS[mes];
@@ -113,7 +161,7 @@ function doPost(e) {
     Logger.log('Cadastro EXISTENTE (edição, telefone: ' + telefoneNormalizado + '). E-mail não enviado por design.');
   }
 
-  return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
+  return ContentService.createTextOutput(JSON.stringify({ status: 'ok', indiceCentavo: indiceCentavo }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -493,6 +541,7 @@ function buscarPorTelefone(e) {
           confirmado: estaConfirmado(linhas[i][col.confirmado - 1])
         };
       }
+      var indiceCentavoCelula = linhas[i][COL_INDICE_CENTAVO - 1];
       resultado = {
         encontrado: true,
         respNome: linhas[i][1] || '',
@@ -500,7 +549,10 @@ function buscarPorTelefone(e) {
         familiares: linhas[i][6] || '[]',
         vaiOnibus: linhas[i][17] || 'Sim',
         respEmail: linhas[i][18] || '',
-        parcelas: parcelas
+        parcelas: parcelas,
+        indiceCentavo: (indiceCentavoCelula === '' || indiceCentavoCelula === null || isNaN(Number(indiceCentavoCelula)))
+          ? null
+          : Number(indiceCentavoCelula)
       };
       break;
     }
