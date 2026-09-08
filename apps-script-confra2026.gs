@@ -208,86 +208,120 @@ function mostrarListaOnibus() {
  * Guardado em PropertiesService (nao numa celula), entao nao depende de nenhuma linha
  * especifica da planilha e nao corre risco de leitura suja entre execucoes concorrentes.
  */
+function proximoIndiceCentavoSemLock_() {
+  var props = PropertiesService.getScriptProperties();
+  var atual = Number(props.getProperty('ULTIMO_INDICE_CENTAVO') || '-1');
+  var proximo = atual + 1;
+  props.setProperty('ULTIMO_INDICE_CENTAVO', String(proximo));
+  return proximo;
+}
+
+// Mantida para compatibilidade com qualquer chamador externo: adquire seu proprio lock.
+// O doPost NAO usa esta funcao diretamente (ver proximoIndiceCentavoSemLock_) porque ja
+// esta dentro do lock mais amplo que cobre toda a deteccao de duplicidade — pedir um
+// segundo lock ali dentro arriscaria a propria execucao travar esperando por si mesma.
 function obterProximoIndiceCentavo() {
   var lock = LockService.getScriptLock();
   lock.waitLock(30000); // espera ate 30s se outro cadastro estiver sendo gravado ao mesmo tempo
   try {
-    var props = PropertiesService.getScriptProperties();
-    var atual = Number(props.getProperty('ULTIMO_INDICE_CENTAVO') || '-1');
-    var proximo = atual + 1;
-    props.setProperty('ULTIMO_INDICE_CENTAVO', String(proximo));
-    return proximo;
+    return proximoIndiceCentavoSemLock_();
   } finally {
     lock.releaseLock();
   }
 }
 
+/**
+ * LOCK NO doPost: sem isso, dois envios do formulario quase simultaneos (duplo clique,
+ * duplo toque no celular, ou um reenvio automatico do navegador) podem ambos ler a
+ * planilha ANTES de qualquer um dos dois ter gravado sua linha — os dois concluem
+ * "esse telefone ainda nao existe" e os dois dao appendRow, duplicando o cadastro.
+ * O lock serializa: a segunda execucao so le a planilha depois que a primeira ja
+ * terminou de gravar, entao ela enxerga a linha do primeiro cadastro e faz UPDATE
+ * nela em vez de criar uma nova. Isso e o mesmo padrao ja usado em
+ * obterProximoIndiceCentavo() para o contador de centavos — aqui so estendemos a
+ * mesma protecao para a deteccao de duplicidade por telefone, que antes ficava de fora.
+ */
 function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  var telefoneNormalizado = (data.respTel || '').replace(/\D/g, '');
-  var parcelasEnviadas = JSON.parse(data.parcelas || '[]'); // [{mes:'Ago', valor: 50}, ...]
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000); // espera ate 30s se outro envio estiver sendo processado ao mesmo tempo
 
-  var linhas = sheet.getDataRange().getValues();
-  var linhaExistente = -1;
-  for (var i = 1; i < linhas.length; i++) {
-    var telCelula = (linhas[i][3] || '').toString().replace(/\D/g, '');
-    if (telCelula && telCelula === telefoneNormalizado) {
-      linhaExistente = i + 1; // 1-indexado para o Sheets
-      break;
+  var indiceCentavo, eraCadastroNovo, telefoneNormalizado, data, parcelasEnviadas;
+
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    data = JSON.parse(e.postData.contents);
+    telefoneNormalizado = (data.respTel || '').replace(/\D/g, '');
+    parcelasEnviadas = JSON.parse(data.parcelas || '[]'); // [{mes:'Ago', valor: 50}, ...]
+
+    var linhas = sheet.getDataRange().getValues();
+    var linhaExistente = -1;
+    for (var i = 1; i < linhas.length; i++) {
+      var telCelula = (linhas[i][3] || '').toString().replace(/\D/g, '');
+      if (telCelula && telCelula === telefoneNormalizado) {
+        linhaExistente = i + 1; // 1-indexado para o Sheets
+        break;
+      }
     }
-  }
 
-  var novaLinha = new Array(20);
-  novaLinha[0] = new Date();
-  novaLinha[1] = data.respNome || '';
-  novaLinha[2] = data.respRG || '';
-  novaLinha[3] = data.respTel || '';
-  novaLinha[4] = data.totalMinimo || '';
-  novaLinha[5] = data.totalDigitado || '';
-  novaLinha[6] = data.familiares || '[]';
-  novaLinha[17] = data.vaiOnibus || 'Sim';
-  novaLinha[18] = data.respEmail || '';
+    var novaLinha = new Array(20);
+    novaLinha[0] = new Date();
+    novaLinha[1] = data.respNome || '';
+    novaLinha[2] = data.respRG || '';
+    novaLinha[3] = data.respTel || '';
+    novaLinha[4] = data.totalMinimo || '';
+    novaLinha[5] = data.totalDigitado || '';
+    novaLinha[6] = data.familiares || '[]';
+    novaLinha[17] = data.vaiOnibus || 'Sim';
+    novaLinha[18] = data.respEmail || '';
 
-  // Indice de identificacao via centavo: atribuido UMA VEZ por cadastro e preservado em
-  // qualquer edicao futura, para o valor continuar apontando pra mesma familia sempre.
-  var indiceCentavo;
-  if (linhaExistente > 0) {
-    var indiceExistente = sheet.getRange(linhaExistente, COL_INDICE_CENTAVO).getValue();
-    var jaTemIndiceValido = indiceExistente !== '' && indiceExistente !== null && !isNaN(Number(indiceExistente));
-    indiceCentavo = jaTemIndiceValido ? Number(indiceExistente) : obterProximoIndiceCentavo();
-  } else {
-    indiceCentavo = obterProximoIndiceCentavo();
-  }
-  novaLinha[COL_INDICE_CENTAVO - 1] = indiceCentavo;
+    // Indice de identificacao via centavo: atribuido UMA VEZ por cadastro e preservado em
+    // qualquer edicao futura, para o valor continuar apontando pra mesma familia sempre.
+    // Usa a variante SEM lock proprio (proximoIndiceCentavoSemLock_) porque ja estamos
+    // dentro do lock deste doPost — pedir um segundo lock aqui travaria a execucao
+    // esperando por si mesma.
+    if (linhaExistente > 0) {
+      var indiceExistente = sheet.getRange(linhaExistente, COL_INDICE_CENTAVO).getValue();
+      var jaTemIndiceValido = indiceExistente !== '' && indiceExistente !== null && !isNaN(Number(indiceExistente));
+      indiceCentavo = jaTemIndiceValido ? Number(indiceExistente) : proximoIndiceCentavoSemLock_();
+    } else {
+      indiceCentavo = proximoIndiceCentavoSemLock_();
+    }
+    novaLinha[COL_INDICE_CENTAVO - 1] = indiceCentavo;
 
-  for (var mes in MESES_COLS) {
-    var col = MESES_COLS[mes];
-    var confirmadoAtual = false;
+    for (var mes in MESES_COLS) {
+      var col = MESES_COLS[mes];
+      var confirmadoAtual = false;
+
+      if (linhaExistente > 0) {
+        confirmadoAtual = estaConfirmado(sheet.getRange(linhaExistente, col.confirmado).getValue());
+      }
+
+      if (confirmadoAtual) {
+        // Mês já confirmado (célula preenchida com qualquer texto): preserva valor e confirmação.
+        novaLinha[col.valor - 1] = sheet.getRange(linhaExistente, col.valor).getValue();
+        novaLinha[col.confirmado - 1] = sheet.getRange(linhaExistente, col.confirmado).getValue();
+      } else {
+        var item = parcelasEnviadas.filter(function (p) { return p.mes === mes; })[0];
+        novaLinha[col.valor - 1] = item ? item.valor : 0;
+        novaLinha[col.confirmado - 1] = '';
+      }
+    }
+
+    eraCadastroNovo = linhaExistente <= 0;
 
     if (linhaExistente > 0) {
-      confirmadoAtual = estaConfirmado(sheet.getRange(linhaExistente, col.confirmado).getValue());
-    }
-
-    if (confirmadoAtual) {
-      // Mês já confirmado (célula preenchida com qualquer texto): preserva valor e confirmação.
-      novaLinha[col.valor - 1] = sheet.getRange(linhaExistente, col.valor).getValue();
-      novaLinha[col.confirmado - 1] = sheet.getRange(linhaExistente, col.confirmado).getValue();
+      sheet.getRange(linhaExistente, 1, 1, novaLinha.length).setValues([novaLinha]);
     } else {
-      var item = parcelasEnviadas.filter(function (p) { return p.mes === mes; })[0];
-      novaLinha[col.valor - 1] = item ? item.valor : 0;
-      novaLinha[col.confirmado - 1] = '';
+      sheet.appendRow(novaLinha);
     }
+  } finally {
+    lock.releaseLock();
   }
 
-  var eraCadastroNovo = linhaExistente <= 0;
-
-  if (linhaExistente > 0) {
-    sheet.getRange(linhaExistente, 1, 1, novaLinha.length).setValues([novaLinha]);
-  } else {
-    sheet.appendRow(novaLinha);
-  }
-
+  // Envio de email fica FORA do lock de proposito: MailApp pode demorar um pouco e nao
+  // precisa da planilha travada enquanto isso — travar so o minimo necessario (leitura +
+  // decisao + gravacao) mantem a fila de envios simultaneos mais rapida para quem esta
+  // esperando a vez.
   if (eraCadastroNovo) {
     Logger.log('Cadastro NOVO detectado (telefone: ' + telefoneNormalizado + '). Disparando e-mail para: ' + data.respEmail);
     enviarEmailConfirmacao(data.respNome, data.respEmail, data.totalDigitado, data.vaiOnibus, parcelasEnviadas);
